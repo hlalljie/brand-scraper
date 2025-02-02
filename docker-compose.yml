@@ -3,23 +3,20 @@ services:
         container_name: brandscraper
         build: .
         volumes:
-            - .:/var/www # Sync the project files with the container
+            - .:/var/www
+            # Exclude node_modules from volume mounting to prevent overwriting
+            - /var/www/node_modules
         ports:
-            - "8000:8000" # Expose the Laravel app port
-            - "11434:11434" # Expose the Ollama API port
-            - "5173:5173" # Expose the Vite dev server port
-            - "13:13" # Expose the Vite dev server port
-            - "8:8"
+            - "8000:8000"
+            - "11434:11434"
+            - "5173:5173"
+            - "80:80"
         environment:
-            - NODE_ENV=development # Ensure the environment is set correctly for dev
+            - NODE_ENV=development
+            - HOST=0.0.0.0 # Allow Vite to accept connections from outside
         command: |
             sh -c "
-              # Start Ollama service
               ollama serve &
-
-              # Start PHP Artisan serve on all interfaces (0.0.0.0)
               php artisan serve --host=0.0.0.0 --port=8000 &
-
-              # Start npm run dev for your frontend
-              npm run dev"
-        restart: always # Ensure the container restarts if it crashes
+              npm run dev -- --host 0.0.0.0"
+        restart: always
