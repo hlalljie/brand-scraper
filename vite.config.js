@@ -15,4 +15,8 @@ export default defineConfig({
             "@": "/resources/ts",
         },
     },
+    server: {
+        host: "0.0.0.0",
+        port: 5173, // Or whatever port you're using for React
+    },
 });

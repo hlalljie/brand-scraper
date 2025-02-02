@@ -1,0 +1,25 @@
+services:
+    brandscraper:
+        container_name: brandscraper
+        build: .
+        volumes:
+            - .:/var/www # Sync the project files with the container
+        ports:
+            - "8000:8000" # Expose the Laravel app port
+            - "11434:11434" # Expose the Ollama API port
+            - "5173:5173" # Expose the Vite dev server port
+            - "13:13" # Expose the Vite dev server port
+            - "8:8"
+        environment:
+            - NODE_ENV=development # Ensure the environment is set correctly for dev
+        command: |
+            sh -c "
+              # Start Ollama service
+              ollama serve &
+
+              # Start PHP Artisan serve on all interfaces (0.0.0.0)
+              php artisan serve --host=0.0.0.0 --port=8000 &
+
+              # Start npm run dev for your frontend
+              npm run dev"
+        restart: always # Ensure the container restarts if it crashes
