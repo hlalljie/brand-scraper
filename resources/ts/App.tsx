@@ -1,11 +1,8 @@
 import React from "react";
+import Home from "./Home";
 
 const App = () => {
-    return (
-        <div>
-            <h1>Scrape Your Brand Colors and Fonts</h1>
-        </div>
-    );
+    return <Home />;
 };
 
 export default App;
