@@ -19,6 +19,16 @@ class BrandScraperController extends Controller
             throw new UrlValidationException('No data provided');
         }
 
+        // check if url data was sent
+        if (!array_key_exists('url', $request->all())) {
+            throw new UrlValidationException('No url data provided');
+        }
+
+        // check if url is empty
+        if (empty($request->input('url'))) {
+            throw new UrlValidationException('No url provided');
+        }
+
         // add https if no http or https present
         $url = $request->input('url');
         if ($url && !str_starts_with($url, 'http://') && !str_starts_with($url, 'https://')) {
@@ -49,6 +59,7 @@ class BrandScraperController extends Controller
     public function index(Request $request)
     {
 
+        // validate and format url
         try {
             $url = $this->getUrl($request);
         } catch (UrlValidationException $e) {
@@ -56,7 +67,6 @@ class BrandScraperController extends Controller
         }
 
         Log::info($url . " validated");
-
 
         //return response
         return response()->json(['message' => 'Hello', "received" => $url]);
