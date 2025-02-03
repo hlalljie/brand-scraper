@@ -10,7 +10,7 @@ const Home = () => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ website: input }),
+            body: JSON.stringify({ url: input }),
         })
             .then((res) => res.json())
             .then((data) => {
