@@ -14,4 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('brand_scraper', [App\Http\Controllers\BrandScraperController::class, 'index'])->name('brandScraper');
+Route::post('brand_scraper', [App\Http\Controllers\BrandScraperController::class, 'index'])->name('brandScraper');

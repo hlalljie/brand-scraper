@@ -6,10 +6,11 @@ const Home = () => {
 
     const handleSubmit = () => {
         fetch("/api/brand_scraper", {
-            method: "Get",
+            method: "Post",
             headers: {
                 "Content-Type": "application/json",
             },
+            body: JSON.stringify({ website: input }),
         })
             .then((res) => res.json())
             .then((data) => {
