@@ -107,13 +107,36 @@ class WebScraper
         return $allContent;
     }
 
-    private function parseScripts($dom)
+    private function parseScripts($dom, bool $lengthy = false)
     {
         $allContent = [];
 
-        // parse wordpress scripts
-        $allContent = array_merge($allContent, $this->parseWordpressScripts($dom));
+        if ($lengthy) {
+            // parse all scripts
+            $allContent = array_merge($allContent, $this->parseAllScripts($dom));
+        } else {
+            // parse wordpress scripts
+            $allContent = array_merge($allContent, $this->parseWordpressScripts($dom));
+        }
 
+        return $allContent;
+    }
+
+    private function parseAllScripts($dom)
+    {
+        $allContent = [];
+        // Get all <script> elements
+        $scriptElements = $dom->getElementsByTagName('script');
+        foreach ($scriptElements as $script) {
+            $src = $script->getAttribute('src');
+            if ($src && str_contains($src, '.js')) {
+                try {
+                    $allContent[] = $this->client->get($src)->getBody();
+                } catch (Exception $e) {
+                    continue;
+                }
+            }
+        }
         return $allContent;
     }
 
@@ -188,7 +211,7 @@ class WebScraper
         return $styleInfo;
     }
 
-    public function scrapeUrl(string $url): string
+    public function scrapeUrl(string $url, bool $lengthy = false): string
     {
         try {
             //get html data as a Document
@@ -200,7 +223,7 @@ class WebScraper
             $allContent = array_merge($allContent, $this->parseHTML($dom));
 
             //parse scripts
-            $allContent = array_merge($allContent, $this->parseScripts($dom));
+            $allContent = array_merge($allContent, $this->parseScripts($dom, $lengthy));
 
             // Join all content with newlines between each piece
             // return implode("\n\n", $allContent);

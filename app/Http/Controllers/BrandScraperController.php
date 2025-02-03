@@ -21,7 +21,7 @@ class BrandScraperController extends Controller
 
     public function __construct()
     {
-        $this->scraper = new WebScraper();
+        $this->scraper = new WebScraper($this->timeout);
     }
 
     private function getUrl(Request $request)
@@ -85,6 +85,8 @@ class BrandScraperController extends Controller
         } catch (Exception $e) {
             return response()->json(["error" => $e->getMessage()], $e->getCode());
         }
+
+        Log::info($url . " parsed");
 
         //return response
         return response()->json(['message' => 'Hello', "received" => $url, 'content' => $content]);
