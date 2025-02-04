@@ -6,14 +6,43 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Dotenv\Dotenv;
+use Exception;
+
+class LLMParseException extends Exception {}
+
+class LLMParseData
+{
+    public array $colors;
+    public array $fonts;
+
+    public function __construct(string $responseString)
+    {
+        // Vaidate json then 
+        if (!json_validate($responseString)) {
+            throw new LLMParseException("Response string is not valid JSON: " . $responseString);
+        }
+
+        // Decode response string to array
+        $responseData = json_decode($responseString, true);
+        try {
+            $this->colors = $responseData["colors"];
+            $this->fonts = $responseData["fonts"];
+        } catch (Exception $e) {
+            throw new LLMParseException("Response JSON is missing required keys: " . $e->getMessage());
+        }
+    }
+
+    public function toArray(): array
+    {
+        return get_object_vars($this);
+    }
+}
 
 
 class OllamaParser
 {
     private Client $client;
     private int $timeout;
-    private $model;
-
     public function __construct(int $timeout = 600)
     {
         $this->timeout = $timeout;
@@ -25,18 +54,38 @@ class OllamaParser
                 'Accept' => 'text/html,text/css,application/javascript',
             ]
         ]);
-        // Load env variable for model
-        $dotenv = Dotenv::createImmutable(__DIR__, '.env.build');
-        $dotenv->load();
-        $this->model = env('OLLAMA_MODEL');
+    }
+
+    private function callAPI(string $userPrompt, string $systemPrompt)
+    {
+        try {
+            // send request to llm
+            $response = $this->client->post('/api/generate', [
+                'json' => [
+                    'model' => 'llama3.2',
+                    'prompt' => $userPrompt,
+                    'system' => $systemPrompt,
+                    'format' => 'json',
+                    'stream' => false,
+                    'temperature' => 0.1,  // Lower temperature for more consistent outputs
+                    'top_p' => 0.1,       // Lower top_p for more focused responses
+                    'timeout' => $this->timeout,
+                    'repetition_penalty' => 1.2
+                ]
+            ]);
+            return $response->getBody()->getContents();
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            throw new LLMParseException('Ollama generate api error');
+        }
     }
 
     public function parse(string $websiteData, int $chunkLength = 10000)
     {
 
         // test smaller input
-        $testData = "body { background-color: #000000; font-family: Arial; }";
-        $websiteData = $testData;
+        //$testData = "body { background-color: #000000; font-family: Arial; }";
+        // $websiteData = $testData;
 
         // set up user prompt
         $userPrompt = "Analyze this website data for colors and fonts:\n\n" . substr($websiteData, 0, $chunkLength);
@@ -58,30 +107,27 @@ Your response MUST match this exact structure (note that the structure contains 
         $systemPrompt = $systemPromptIntro . "\n" . $jsonFormat;
 
         // send request to llm
-        $response = $this->client->post('/api/generate', [
-            'json' => [
-                'model' => $this->model,
-                'prompt' => $userPrompt,
-                'system' => $systemPrompt,
-                'format' => 'json',
-                'stream' => false,
-                'temperature' => 0.1,  // Lower temperature for more consistent outputs
-                'top_p' => 0.1,       // Lower top_p for more focused responses
-                'timeout' => $this->timeout,
-                'repetition_penalty' => 1.2
-            ]
-        ]);
+        try {
+            $body = $this->callAPI($userPrompt, $systemPrompt);
+        } catch (LLMParseException $e) {
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
-        // Get response data f.e. {\"answer\": \"Paris\"}
-        $body = $response->getBody()->getContents();
-        $data = json_decode($body, true);
-        $llmResponse = $data['response'];
 
-        // Decode one more time if it's a JSON string so it loses the backslashes
-        if (is_string($llmResponse) && json_validate($llmResponse)) {
-            $llmResponse = json_decode($llmResponse, true);
+        // Format output
+        try {
+            // Get response data f.e. {\"answer\": \"Paris\"}
+            $data = json_decode($body, true);
+            $llmResponse = $data['response'];
+            //construct data object
+            $llmResponseData = new LLMParseData($llmResponse);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            throw new LLMParseException('LLM output formatting error');
         }
         Log::info($data);
-        return $llmResponse['response'] ?? $llmResponse;
+
+        return $llmResponseData->toArray();
     }
 }

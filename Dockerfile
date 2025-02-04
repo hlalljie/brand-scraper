@@ -45,17 +45,11 @@ RUN composer install
 # Simple path setup
 ENV PATH /var/www/node_modules/.bin:$PATH
 
-COPY .env.build .env.build
-
-RUN echo "Model to be pulled: $(cat .env.build | grep OLLAMA_MODEL | cut -d= -f2)"
-
-# This would work because it's all in one RUN command
-RUN export OLLAMA_MODEL=$(cat .env.build | grep OLLAMA_MODEL | cut -d= -f2) && \
-    echo $OLLAMA_MODEL && \
-    ollama serve & \
+# Ollama setup
+RUN ollama serve & \
     sleep 10 && \
     echo "Server should be ready" && \
-    ollama pull $OLLAMA_MODEL && \
+    ollama pull llama3.2 && \
     echo "Pull completed" && \
     killall ollama && \
     echo "Ollama server stopped and model pulled"

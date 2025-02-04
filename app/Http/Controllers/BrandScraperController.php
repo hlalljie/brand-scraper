@@ -98,7 +98,7 @@ class BrandScraperController extends Controller
         try {
             $result = $this->ollamaParser->parse($content, $chunkLength);
         } catch (Exception $e) {
-            return response()->json(["error" => $e->getMessage()], $e->getCode());
+            return response()->json(["error" => $e->getMessage()]);
         }
 
 

@@ -26,7 +26,7 @@ services:
                 php artisan key:generate
               fi
               # Start services
-              ollama serve --debug &
+              ollama serve &
               php artisan serve --host=0.0.0.0 --port=8000 &
               npm run dev -- --host 0.0.0.0"
         restart: always
