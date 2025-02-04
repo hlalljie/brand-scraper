@@ -2,6 +2,10 @@ services:
     brandscraper:
         container_name: brandscraper
         build: .
+        deploy:
+            resources:
+                limits:
+                    memory: 6G
         volumes:
             - .:/var/www
             - /var/www/node_modules

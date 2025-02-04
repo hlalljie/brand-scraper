@@ -48,6 +48,6 @@ ENV PATH /var/www/node_modules/.bin:$PATH
 # Ollama setup
 RUN ollama serve & \
     sleep 10 && \
-    ollama pull deepseek-r1:8b && \
+    ollama pull deepseek-r1:1.5b && \
     killall ollama && \
     echo "Ollama server stopped and model pulled"
