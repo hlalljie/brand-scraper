@@ -90,8 +90,11 @@ class BrandScraperController extends Controller
             return response()->json(["error" => $e->getMessage()], $e->getCode());
         }
 
+        $chunkLength = 2000;
+        $contentChunk = substr($content, 0, $chunkLength);
+
         try {
-            $result = $this->ollamaParser->parse($content);
+            $result = $this->ollamaParser->parse($content, $chunkLength);
         } catch (Exception $e) {
             return response()->json(["error" => $e->getMessage()], $e->getCode());
         }
@@ -99,6 +102,6 @@ class BrandScraperController extends Controller
         Log::info($url . " parsed");
 
         //return response
-        return response()->json(['message' => 'Hello', "received" => $url, 'content' => $result]);
+        return response()->json(['message' => 'Hello', "received" => $url, 'foundData' => $result, "fullData" => $contentChunk]);
     }
 }
