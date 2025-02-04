@@ -90,6 +90,8 @@ class BrandScraperController extends Controller
             return response()->json(["error" => $e->getMessage()], $e->getCode());
         }
 
+        Log::info($url . " parsed");
+
         $chunkLength = 2000;
         $contentChunk = substr($content, 0, $chunkLength);
 
@@ -99,7 +101,7 @@ class BrandScraperController extends Controller
             return response()->json(["error" => $e->getMessage()], $e->getCode());
         }
 
-        Log::info($url . " parsed");
+
 
         //return response
         return response()->json(['message' => 'Hello', "received" => $url, 'foundData' => $result, "fullData" => $contentChunk]);

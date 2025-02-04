@@ -5,11 +5,14 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Dotenv\Dotenv;
+
 
 class OllamaParser
 {
     private Client $client;
     private int $timeout;
+    private $model;
 
     public function __construct(int $timeout = 600)
     {
@@ -22,16 +25,34 @@ class OllamaParser
                 'Accept' => 'text/html,text/css,application/javascript',
             ]
         ]);
+        // Load env variable for model
+        $dotenv = Dotenv::createImmutable(__DIR__, '.env.build');
+        $dotenv->load();
+        $this->model = env('OLLAMA_MODEL');
     }
 
     public function parse(string $websiteData, int $chunkLength = 10000)
     {
 
+        // test smaller input
+        $testData = "body { background-color: #000000; font-family: Arial; }";
+        $websiteData = $testData;
+
         // set up user prompt
-        $userPrompt = substr($websiteData, 0, $chunkLength);
+        $userPrompt = "Analyze this website data for colors and fonts:\n\n" . substr($websiteData, 0, $chunkLength);
+
 
         // Set up system prompt
-        $systemPromptIntro = "You are a helpful AI assistant. You MUST respond with ONLY valid JSON matching exactly this format, with no other text, markdown, or explanation. The user will give you website data and you will look through it for any fonts or colors. You will respond the the different colors and where they appear. The possible locations for colors are: [background, heading, paragraph, svg, border, button, link, variable, other]. The possible locations for fonts are: [heading, paragraph, button, link, variable, other]. You will respond following the JSON format below, on the top level there should only be two keys, 'colors' and 'fonts'. Colors should include different hex code, rbg, values, or hsla values. Fonts should include different font names.(note that all the colors and fonts in the format example are placeholders):";
+        $systemPromptIntro = "You are a helpful AI assistant that MUST respond with ONLY valid JSON. Your response MUST contain exactly two top-level keys: 'colors' and 'fonts'. No other keys are allowed. No additional text or explanations.
+
+For any website data provided:
+- Extract all colors (hex, rgb, hsla) and their locations
+- Extract all font names and their locations
+
+Valid locations for colors: [background, heading, paragraph, svg, border, button, link, variable, other]
+Valid locations for fonts: [heading, paragraph, button, link, variable, other]
+
+Your response MUST match this exact structure (note that the structure contains placeholder data for colors and fonts and should not be copied exactly):";
         // giv structural data
         $jsonFormat = '{"colors": {"#000000": ["background", "heading"], "#123456":["other"]}, "fonts": {"Inter": ["heading", "paragraph"], "Arial": ["button"], "Times New Roman": ["heading", "other"]}}';
         $systemPrompt = $systemPromptIntro . "\n" . $jsonFormat;
@@ -39,11 +60,15 @@ class OllamaParser
         // send request to llm
         $response = $this->client->post('/api/generate', [
             'json' => [
-                'model' => 'deepseek-r1:1.5b',
+                'model' => $this->model,
                 'prompt' => $userPrompt,
                 'system' => $systemPrompt,
                 'format' => 'json',
-                'stream' => false
+                'stream' => false,
+                'temperature' => 0.1,  // Lower temperature for more consistent outputs
+                'top_p' => 0.1,       // Lower top_p for more focused responses
+                'timeout' => $this->timeout,
+                'repetition_penalty' => 1.2
             ]
         ]);
 
