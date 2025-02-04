@@ -11,8 +11,8 @@ use Exception;
 class WebScraper
 {
 
-    private $client;
-    private $timeout;
+    private Client $client;
+    private int $timeout;
 
     public function __construct(int $timeout = 30)
     {

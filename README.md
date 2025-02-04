@@ -15,3 +15,5 @@ Note: Ollama pull is not perfect, if it fails on this step try again, if it fail
 
 Option 1: Docker
 `docker compose up`
+
+Open the live App by going to http://localhost:8000/

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Services\WebScraper;
+use App\Services\OllamaParser;
 use Exception;
 
 class UrlValidationException extends Exception {}
@@ -17,11 +18,14 @@ class BrandScraperController extends Controller
 
 
     private $timeout = 30;
+    private $llmTimeout = 600;
     private $scraper;
+    private $ollamaParser;
 
     public function __construct()
     {
         $this->scraper = new WebScraper($this->timeout);
+        $this->ollamaParser = new OllamaParser($this->llmTimeout);
     }
 
     private function getUrl(Request $request)
@@ -88,7 +92,18 @@ class BrandScraperController extends Controller
 
         Log::info($url . " parsed");
 
+        $chunkLength = 2000;
+        $contentChunk = substr($content, 0, $chunkLength);
+
+        try {
+            $result = $this->ollamaParser->parse($content, $chunkLength);
+        } catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()]);
+        }
+
+
+
         //return response
-        return response()->json(['message' => 'Hello', "received" => $url, 'content' => $content]);
+        return response()->json(['message' => 'Hello', "received" => $url, 'foundData' => $result, "fullData" => $contentChunk]);
     }
 }
