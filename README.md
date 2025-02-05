@@ -6,14 +6,23 @@ Scrape brand colors and fonts from a web url using AI
 
 ### Step 1: Install Dependencies
 
-Option 1: Docker
+#### Option 1: Docker
+
 `docker compose build`
 
-Note: Ollama pull is not perfect, if it fails on this step try again, if it fails twice increase the sleep duration after the server start
+**Note**: Ollama will pull a 2 GB llama3.2 model on build. Sometimes it will fail before downloading, just run the command again.
 
 ### Step 2: Run the Project
 
-Option 1: Docker
+#### Option 1: Docker
+
 `docker compose up`
 
 Open the live App by going to http://localhost:8000/
+
+## Requirements
+
+-   Recommended 8GB of Ram, though allocating only 6GB can work
+-   Minimum 4 Core modern CPU or GPU with at least 12GB of VRAM, the more CPU allocated the faster you response time.
+-   6.5GB of space if running on Docker. 3GB for Ollama and 2GB for llama 3.2B.
+-   **If running on docker make sure to allocate these resources in resource settings**
