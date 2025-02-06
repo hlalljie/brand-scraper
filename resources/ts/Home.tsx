@@ -58,17 +58,30 @@ const Home = (): JSX.Element => {
     };
 
     return (
-        <div className="main-content ">
-            <div>
-                <h1>Home</h1>
+        <div id='main' className="relative h-screen grid grid-rows-[auto_1fr_auto]" >
+            <div id='header' className="p-2">
+                <h1>Brand Scraper</h1>
             </div>
-            <input
-                type="text"
-                onChange={(e) => setInput(e.target.value)}
-            ></input>
-            <button onClick={handleSubmit}>Submit</button>
-            {loading && <Loading />}
-            {resData ? <ResultsDisplay resData={resData} /> : null}
+            {(!loading && !resData) ?
+                <div id='content-container' className="max-w-md mt-[30vh]">
+                    <h2 id="intro" className='text-center'>Scrape a website for its brand colors and fonts.</h2>
+                </div> :
+                <div id='content-container' className="pt-10 max-wd-lg">
+                    {loading && <Loading />}
+                    {resData ? <ResultsDisplay resData={resData} /> : null}
+                </div>
+            }
+            <section id='input-container' className="w-full ">
+                <div id='input ' className="mx-auto w-fit p-4">
+                    <input
+                        className="rounded-tl-sm rounded-bl-sm max-w-sm bg-inputcolor w-screen px-4 py-2 text-lg focus:outline-none"
+                        type="text"
+                        placeholder="Enter a website URL"
+                        onChange={(e) => setInput(e.target.value)}
+                    ></input>
+                    <button className='rounded-tr-sm rounded-br-sm bg-inputbtncolor px-4 py-2 text-lg text-gray-200 hover:text-white' onClick={handleSubmit}>Submit</button>
+                </div>
+            </section>
         </div>
     );
 };

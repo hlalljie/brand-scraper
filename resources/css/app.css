@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body{
+    @apply bg-backgroundcolor text-textcolor font-sans;
+}
+h1{
+    font-size: 1.3rem;
+}
+h2{
+    font-size: 2rem;
+}
+#content-container{
+    @apply p-4 mx-auto;
+}
