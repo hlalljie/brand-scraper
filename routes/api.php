@@ -15,3 +15,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('brand_scraper', [App\Http\Controllers\BrandScraperController::class, 'index'])->name('brandScraper');
+Route::post('test', [App\Http\Controllers\TestController::class, 'index'])->name('test');
