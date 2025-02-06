@@ -11,6 +11,21 @@ h1{
 h2{
     font-size: 2rem;
 }
+h3{
+    font-size: 1.8rem;
+}
+h4{
+    font-size: 1.6rem;
+}
+h5{
+    font-size: 1.4rem;
+}
 #content-container{
     @apply p-4 mx-auto;
+}
+#color-panel #color-name{
+    visibility: hidden;
+}
+#color-panel:hover #color-name{
+    visibility: visible;
 }

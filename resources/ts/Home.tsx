@@ -1,4 +1,7 @@
 import { JSX, useState } from "react";
+import chroma from 'chroma-js';
+import { Loader2 } from 'lucide-react'
+
 
 class ResultData {
     error?: Error;
@@ -39,8 +42,8 @@ const Home = (): JSX.Element => {
     const [resData, setResData] = useState(null);
 
     const handleSubmit = () => {
-        // const fetchAddress = "/api/brand_scraper";
-        const fetchAddress = "api/test";
+        const fetchAddress = "/api/brand_scraper";
+        // const fetchAddress = "api/test";
 
         setLoading(true);
         fetch(fetchAddress, {
@@ -62,13 +65,16 @@ const Home = (): JSX.Element => {
             <div id='header' className="p-2">
                 <h1>Brand Scraper</h1>
             </div>
-            {(!loading && !resData) ?
+            {(!resData) ?
                 <div id='content-container' className="max-w-md mt-[30vh]">
-                    <h2 id="intro" className='text-center'>Scrape a website for its brand colors and fonts.</h2>
+                    {loading ? <Loading /> : <h2 id="intro" className='text-center'>Scrape a website for its brand colors and fonts.</h2>
+                    }
+
+
                 </div> :
-                <div id='content-container' className="pt-10 max-wd-lg">
-                    {loading && <Loading />}
+                <div id='content-container' className="pt-10 max-w-2xl w-full">
                     {resData ? <ResultsDisplay resData={resData} /> : null}
+                    {loading && <Loading withContent />}
                 </div>
             }
             <section id='input-container' className="w-full ">
@@ -86,8 +92,11 @@ const Home = (): JSX.Element => {
     );
 };
 
-const Loading = (): JSX.Element => {
-    return <div className="loadingResults">Loading</div>;
+const Loading = ({ withContent }: { withContent?: boolean }): JSX.Element => {
+    return <div id="loading-container" className={"text-center" + (withContent ? " mt-10" : "")}>
+        {(!withContent) && <h3 className="mb-4">Parsing Site Content</h3>}
+        <Loader2 className="animate-spin mx-auto" size={40} strokeWidth={2} />
+    </div>;
 };
 
 const ResultsDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
@@ -110,8 +119,8 @@ const ErrorDisplay = ({ error }: { error: Error }): JSX.Element => {
 
 const DataDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
     return (
-        <div className="dataDisplay">
-            <h3>Brand Colors for {resData.received}</h3>
+        <div id="data-display">
+            <h3 className="text-center">Branding for {resData.received}</h3>
             {resData.brandData!.colors ? (
                 <ColorDisplay colors={resData.brandData!.colors} />
             ) : null}
@@ -125,30 +134,51 @@ const DataDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
 };
 
 const ColorDisplay = ({ colors }: { colors: ColorData }): JSX.Element => {
+
     return (
-        <div className="colorDisplay">
-            <h3>Colors</h3>
-            <p>{JSON.stringify(colors, null, 2)}</p>
+        <div id="color-display" className="mt-10">
+            <div id='color-container' className="flex flex-wrap justify-space-between gap-8">
+                {Object.keys(colors).map((color) => (
+                    <ColorPanel key={color} color={color} />
+                ))}
+            </div>
+
         </div>
     );
 };
 
+const ColorPanel = ({ color }: { color: string }): JSX.Element => {
+    const textColor = chroma(color).luminance() > 0.5 ? "black" : "white";
+    return (
+        <div
+            id="color-panel"
+            className="rounded-sm flex-1 min-w-[100px] max-w-[200px] aspect-square flex items-center justify-center"
+            style={{ backgroundColor: color }}
+        >
+            <h5 id="color-name" style={{ color: textColor }}>{color}</h5>
+        </div>
+    )
+}
+
 const FontDisplay = ({ fonts }: { fonts: FontData }): JSX.Element => {
     return (
-        <div className="fontDisplay">
-            <h3>Fonts</h3>
-            <p>{JSON.stringify(fonts, null, 2)}</p>
+        <div id="font-display" className="mt-10 text-center">
+            <h4>
+                {"Fonts: " + Object.keys(fonts).join(', ')}
+            </h4>
         </div>
     );
 };
 
 const ParsedDataDisplay = ({
     parsedData,
+    visible
 }: {
     parsedData: string;
+    visible?: boolean;
 }): JSX.Element => {
     return (
-        <div className="fullDataDisplay">
+        <div id="parsed-data-container" className={visible ? "" : "hidden"}>
             <h3>All Parsed Data</h3>
             <p>{parsedData}</p>
         </div>
