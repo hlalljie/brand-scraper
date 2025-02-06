@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { JSX, useState } from "react";
 
 class ResultData {
     error?: Error;
@@ -23,7 +23,6 @@ class BrandData {
         brandData.colors && (this.colors = brandData.colors as ColorData);
         brandData.fonts && (this.fonts = brandData.fonts as FontData);
     }
-    π;
 }
 
 interface ColorData {
@@ -34,10 +33,10 @@ interface FontData {
     [font: string]: string[];
 }
 
-const Home = () => {
+const Home = (): JSX.Element => {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
-    const [resData, setResData]: [ResultData | null, any] = useState(null);
+    const [resData, setResData] = useState(null);
 
     const handleSubmit = () => {
         // const fetchAddress = "/api/brand_scraper";
@@ -53,13 +52,13 @@ const Home = () => {
         })
             .then((res) => res.json())
             .then((data) => {
-                setResData(new ResultData(data) as ResultData);
+                setResData(new ResultData(data) as React.SetStateAction<null>);
                 setLoading(false);
             });
     };
 
     return (
-        <>
+        <div className="main-content ">
             <div>
                 <h1>Home</h1>
             </div>
@@ -70,15 +69,15 @@ const Home = () => {
             <button onClick={handleSubmit}>Submit</button>
             {loading && <Loading />}
             {resData ? <ResultsDisplay resData={resData} /> : null}
-        </>
+        </div>
     );
 };
 
-const Loading = () => {
+const Loading = (): JSX.Element => {
     return <div className="loadingResults">Loading</div>;
 };
 
-const ResultsDisplay = ({ resData }) => {
+const ResultsDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
     return (
         <div className="resultsDisplay">
             {resData.error ? (
@@ -92,26 +91,27 @@ const ResultsDisplay = ({ resData }) => {
     );
 };
 
-const ErrorDisplay = ({ error }: { error: Error }) => {
-    return <div className="errorDisplay">{error}</div>;
+const ErrorDisplay = ({ error }: { error: Error }): JSX.Element => {
+    return <div className="errorDisplay"><p>{error.toString()}</p></div>;
 };
 
-const DataDisplay = ({ resData }: { resData: ResultData }) => {
+const DataDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
     return (
         <div className="dataDisplay">
             <h3>Brand Colors for {resData.received}</h3>
-            {resData.brandData.colors ? (
-                <ColorDisplay colors={resData.brandData.colors} />
+            {resData.brandData!.colors ? (
+                <ColorDisplay colors={resData.brandData!.colors} />
             ) : null}
-            {resData.brandData.fonts ? (
-                <FontDisplay fonts={resData.brandData.fonts} />
+            {resData.brandData!.fonts ? (
+                <FontDisplay fonts={resData.brandData!.fonts} />
             ) : null}
-            <ParsedDataDisplay parsedData={resData.parsedData} />
+            {resData.parsedData && (<ParsedDataDisplay parsedData={resData.parsedData} />)}
+
         </div>
     );
 };
 
-const ColorDisplay = ({ colors }: { colors: ColorData }) => {
+const ColorDisplay = ({ colors }: { colors: ColorData }): JSX.Element => {
     return (
         <div className="colorDisplay">
             <h3>Colors</h3>
@@ -120,7 +120,7 @@ const ColorDisplay = ({ colors }: { colors: ColorData }) => {
     );
 };
 
-const FontDisplay = ({ fonts }: { fonts: FontData }) => {
+const FontDisplay = ({ fonts }: { fonts: FontData }): JSX.Element => {
     return (
         <div className="fontDisplay">
             <h3>Fonts</h3>
@@ -129,7 +129,11 @@ const FontDisplay = ({ fonts }: { fonts: FontData }) => {
     );
 };
 
-const ParsedDataDisplay = ({ parsedData }: { parsedData: string }) => {
+const ParsedDataDisplay = ({
+    parsedData,
+}: {
+    parsedData: string;
+}): JSX.Element => {
     return (
         <div className="fullDataDisplay">
             <h3>All Parsed Data</h3>
