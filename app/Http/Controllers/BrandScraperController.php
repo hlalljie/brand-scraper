@@ -104,6 +104,6 @@ class BrandScraperController extends Controller
 
 
         //return response
-        return response()->json(['message' => 'Hello', "received" => $url, 'foundData' => $result, "fullData" => $contentChunk]);
+        return response()->json(["received" => $url, 'brandData' => $result, "parsedData" => $contentChunk]);
     }
 }
