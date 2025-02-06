@@ -1,9 +1,43 @@
-import { React, useState, use } from "react";
+import { React, useState } from "react";
+
+class ResultData {
+    error?: Error;
+    received?: string;
+    brandData?: BrandData;
+    parsedData?: string;
+
+    constructor(resData: any) {
+        resData.error && (this.error = resData.error);
+        resData.received && (this.received = resData.received);
+        resData.brandData &&
+            (this.brandData = new BrandData(resData.brandData));
+        resData.parsedData && (this.parsedData = resData.parsedData);
+    }
+}
+
+class BrandData {
+    colors?: ColorData;
+    fonts?: FontData;
+
+    constructor(brandData: Record<string, any>) {
+        brandData.colors && (this.colors = brandData.colors as ColorData);
+        brandData.fonts && (this.fonts = brandData.fonts as FontData);
+    }
+    π;
+}
+
+interface ColorData {
+    [color: string]: string[];
+}
+
+interface FontData {
+    [font: string]: string[];
+}
 
 const Home = () => {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
-    const [resData, setResData]: [Object | null, any] = useState(null);
+    const [resData, setResData]: [ResultData | null, any] = useState(null);
 
     const handleSubmit = () => {
         // const fetchAddress = "/api/brand_scraper";
@@ -19,7 +53,7 @@ const Home = () => {
         })
             .then((res) => res.json())
             .then((data) => {
-                setResData(data);
+                setResData(new ResultData(data) as ResultData);
                 setLoading(false);
             });
     };
@@ -58,13 +92,14 @@ const ResultsDisplay = ({ resData }) => {
     );
 };
 
-const ErrorDisplay = ({ error }) => {
+const ErrorDisplay = ({ error }: { error: Error }) => {
     return <div className="errorDisplay">{error}</div>;
 };
 
-const DataDisplay = ({ resData }) => {
+const DataDisplay = ({ resData }: { resData: ResultData }) => {
     return (
         <div className="dataDisplay">
+            <h3>Brand Colors for {resData.received}</h3>
             {resData.brandData.colors ? (
                 <ColorDisplay colors={resData.brandData.colors} />
             ) : null}
@@ -76,7 +111,7 @@ const DataDisplay = ({ resData }) => {
     );
 };
 
-const ColorDisplay = ({ colors }) => {
+const ColorDisplay = ({ colors }: { colors: ColorData }) => {
     return (
         <div className="colorDisplay">
             <h3>Colors</h3>
@@ -85,7 +120,7 @@ const ColorDisplay = ({ colors }) => {
     );
 };
 
-const FontDisplay = ({ fonts }) => {
+const FontDisplay = ({ fonts }: { fonts: FontData }) => {
     return (
         <div className="fontDisplay">
             <h3>Fonts</h3>
@@ -94,10 +129,10 @@ const FontDisplay = ({ fonts }) => {
     );
 };
 
-const ParsedDataDisplay = ({ parsedData }) => {
+const ParsedDataDisplay = ({ parsedData }: { parsedData: string }) => {
     return (
         <div className="fullDataDisplay">
-            <h3>Full Data</h3>
+            <h3>All Parsed Data</h3>
             <p>{parsedData}</p>
         </div>
     );
