@@ -41,7 +41,7 @@ const Home = (): JSX.Element => {
     const [loading, setLoading] = useState(false);
     const [resData, setResData] = useState(null);
 
-    const handleSubmit = () => {
+    const handleSearch = () => {
         const fetchAddress = "/api/find-styles";
         // const fetchAddress = "api/test";
 
@@ -62,7 +62,7 @@ const Home = (): JSX.Element => {
 
     return (
         <div id='main' className="relative h-screen grid grid-rows-[auto_1fr_auto]" >
-            <div id='header' className="p-2">
+            <div id='header' className="p-3">
                 <h1>Style Finder</h1>
             </div>
             {(!resData) ?
@@ -78,14 +78,14 @@ const Home = (): JSX.Element => {
                 </div>
             }
             <section id='input-container' className="w-full ">
-                <div id='input ' className="mx-auto w-fit p-4">
+                <div id='input ' className="mx-auto w-fit p-7">
                     <input
                         className="rounded-tl-sm rounded-bl-sm max-w-sm bg-inputcolor w-screen px-4 py-2 text-lg focus:outline-none"
                         type="text"
                         placeholder="Enter a website URL"
                         onChange={(e) => setInput(e.target.value)}
                     ></input>
-                    <button className='rounded-tr-sm rounded-br-sm bg-inputbtncolor px-4 py-2 text-lg text-gray-200 hover:text-white' onClick={handleSubmit}>Submit</button>
+                    <button className='rounded-tr-sm rounded-br-sm bg-inputbtncolor px-4 py-2 text-lg text-gray-200 hover:text-white' onClick={handleSearch}>Search</button>
                 </div>
             </section>
         </div>

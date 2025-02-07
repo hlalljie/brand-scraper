@@ -14,13 +14,16 @@ export default {
             colors: {
                 'textcolor': '#ffffff',
                 'backgroundcolor': '#343434',
-                'inputcolor': '#212121',
+                'inputcolor': '#242424',
                 'inputbtncolor': '#1e1e1e'
             },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Nunito', ...defaultTheme.fontFamily.sans],
 
             },
+            letterSpacing: {
+                heading: '.01em',
+            }
         },
     },
     plugins: [],
