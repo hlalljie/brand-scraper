@@ -42,7 +42,7 @@ const Home = (): JSX.Element => {
     const [resData, setResData] = useState(null);
 
     const handleSubmit = () => {
-        const fetchAddress = "/api/brand_scraper";
+        const fetchAddress = "/api/find-styles";
         // const fetchAddress = "api/test";
 
         setLoading(true);
@@ -63,11 +63,11 @@ const Home = (): JSX.Element => {
     return (
         <div id='main' className="relative h-screen grid grid-rows-[auto_1fr_auto]" >
             <div id='header' className="p-2">
-                <h1>Brand Scraper</h1>
+                <h1>Style Finder</h1>
             </div>
             {(!resData) ?
                 <div id='content-container' className="max-w-md mt-[30vh]">
-                    {loading ? <Loading /> : <h2 id="intro" className='text-center'>Scrape a website for its brand colors and fonts.</h2>
+                    {loading ? <Loading /> : <h2 id="intro" className='text-center'>Search a website for its brand colors and fonts.</h2>
                     }
 
 

@@ -14,5 +14,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('brand_scraper', [App\Http\Controllers\BrandScraperController::class, 'index'])->name('brandScraper');
+Route::post('find-styles', [App\Http\Controllers\StyleFinderController::class, 'index'])->name('styleFinder');
 Route::post('test', [App\Http\Controllers\TestController::class, 'index'])->name('test');

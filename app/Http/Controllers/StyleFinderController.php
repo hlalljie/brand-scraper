@@ -13,7 +13,7 @@ class UrlValidationException extends Exception {}
 
 
 
-class BrandScraperController extends Controller
+class StyleFinderController extends Controller
 {
 
 

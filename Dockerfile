@@ -1,7 +1,7 @@
 # Stage 1: Build the Node.js dependencies
 FROM node:18 AS build
 
-WORKDIR /var/www
+WORKDIR /style-finder
 
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
@@ -34,16 +34,16 @@ RUN docker-php-ext-install pdo_sqlite
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+WORKDIR /style-finder
 
 # Copy built node_modules and application code
-COPY --from=build /var/www /var/www
+COPY --from=build /style-finder /style-finder
 
 # Install PHP dependencies
 RUN composer install
 
 # Simple path setup
-ENV PATH /var/www/node_modules/.bin:$PATH
+ENV PATH /style-finder/node_modules/.bin:$PATH
 
 # Ollama setup
 RUN ollama serve & \

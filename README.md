@@ -1,12 +1,12 @@
-# Brand Scraper
+# Style Finder
 
-Scrape brand colors and fonts from a web url using AI
+Search a website for it's brand colors and fonts.
 
 ## Setup
 
 ### Step 1: Install Dependencies
 
-#### Option 1: Docker
+#### Docker
 
 `docker compose build`
 
@@ -14,7 +14,7 @@ Scrape brand colors and fonts from a web url using AI
 
 ### Step 2: Run the Project
 
-#### Option 1: Docker
+#### Docker
 
 `docker compose up`
 
