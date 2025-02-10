@@ -61,21 +61,23 @@ const Home = (): JSX.Element => {
     };
 
     return (
-        <div id='main' className="relative h-screen grid grid-rows-[auto_1fr_auto]" >
-            <div id='header' className="p-3">
+        <div id='main' className="background-gradient animate-gradient-x-slow relative h-screen grid grid-rows-[auto_1fr_auto]" >
+            <section id='header' className="p-3">
                 <h1>Style Finder</h1>
-            </div>
+            </section>
             {(!resData) ?
-                <div id='content-container' className="max-w-md mt-[30vh]">
-                    {loading ? <Loading /> : <h2 id="intro" className='text-center'>Search a website for its brand colors and fonts.</h2>
+                <section id='content-container' className="max-w-md mt-[30vh]">
+                    {
+                        loading ? <Loading /> :
+                            <h2 id="intro" className='text-center animate-gradient-x heading-gradient bg-clip-text text-transparent'>Search a website for its brand colors and fonts.</h2>
                     }
 
 
-                </div> :
-                <div id='content-container' className="pt-10 max-w-2xl w-full">
+                </section> :
+                <section id='content-container' className="pt-10 max-w-2xl w-full">
                     {resData ? <ResultsDisplay resData={resData} /> : null}
                     {loading && <Loading withContent />}
-                </div>
+                </section>
             }
             <section id='input-container' className="w-full ">
                 <div id='input ' className="mx-auto w-fit p-7">
@@ -85,7 +87,7 @@ const Home = (): JSX.Element => {
                         placeholder="Enter a website URL"
                         onChange={(e) => setInput(e.target.value)}
                     ></input>
-                    <button className='rounded-tr-sm rounded-br-sm bg-inputbtncolor px-4 py-2 text-lg text-gray-200 hover:text-white' onClick={handleSearch}>Search</button>
+                    <button id='search' className='rounded-tr-sm rounded-br-sm bg-inputbtncolor px-4 py-2 text-lg text-gray-200 hover:text-white' onClick={handleSearch}>Search</button>
                 </div>
             </section>
         </div>

@@ -14,7 +14,7 @@ export default {
             colors: {
                 'textcolor': '#ffffff',
                 'backgroundcolor': '#343434',
-                'inputcolor': '#242424',
+                'inputcolor': '#181818',
                 'inputbtncolor': '#1e1e1e'
             },
             fontFamily: {
@@ -23,7 +23,27 @@ export default {
             },
             letterSpacing: {
                 heading: '.01em',
-            }
+            },
+            animation: {
+                'gradient-x': 'gradient-x 10s linear infinite',
+                'gradient-x-slow': 'gradient-x 20s linear infinite'
+              },
+              keyframes: {
+                'gradient-x': {
+                  '0%': {
+                    'background-size': '200% 200%',
+                    'background-position': '200% center'
+                  },
+                  '50%': {
+                    'background-size': '200% 200%',
+                    'background-position': '100% center'
+                  },
+                  '100%': {
+                    'background-size': '200% 200%',
+                    'background-position': '00% center'
+                  },
+                },
+              },
         },
     },
     plugins: [],
