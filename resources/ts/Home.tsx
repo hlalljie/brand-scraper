@@ -43,8 +43,8 @@ const Home = (): JSX.Element => {
     const [resData, setResData] = useState(null);
 
     const handleSearch = () => {
-        const fetchAddress = "/api/find-styles";
-        // const fetchAddress = "api/test";
+        // const fetchAddress = "/api/find-styles";
+        const fetchAddress = "api/test";
 
         const tempInput = input;
         setCurrentSite(tempInput);
@@ -55,7 +55,7 @@ const Home = (): JSX.Element => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: input, testNumber: 1, loadTime: 2 }),
+            body: JSON.stringify({ url: input, testNumber: 0, loadTime: 2 }),
         })
             .then((res) => res.json())
             .then((data) => {
@@ -201,7 +201,12 @@ const FontDisplay = ({ fonts }: { fonts: FontData }): JSX.Element => {
     return (
         <div id="font-display" className="mt-10 text-left">
             <h3>Fonts:</h3>
-            <h4>{Object.keys(fonts).join(', ')}</h4>
+            {Object.entries(fonts).map(([key, values]) => (
+                <h4 key={key}>
+                    <strong>{key}</strong> - {values.join(", ")}
+                </h4>
+            ))}
+
         </div>
     );
 };
