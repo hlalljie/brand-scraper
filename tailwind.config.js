@@ -15,7 +15,11 @@ export default {
                 'textcolor': '#ffffff',
                 'backgroundcolor': '#343434',
                 'inputcolor': '#181818',
-                'inputbtncolor': '#1e1e1e'
+                'inputbtncolor': '#181818',
+                'inputreadycolor': '#131313',
+                'gradientanim': {
+                    'colors': ['#97d0ff', '#bdb9ff', '#deb0fd', '#febed7', '#ffd5a7'],
+                    'gradient': 'linear-gradient(90deg, #97d0ff, #bdb9ff, #deb0fd, #febed7, #ffd5a7, #febed7, #d9b0ff, #97d0ff, #97d0ff)'}
             },
             fontFamily: {
                 sans: ['Nunito', ...defaultTheme.fontFamily.sans],
