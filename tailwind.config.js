@@ -14,8 +14,12 @@ export default {
             colors: {
                 'textcolor': '#ffffff',
                 'backgroundcolor': '#343434',
-                'inputcolor': '#242424',
-                'inputbtncolor': '#1e1e1e'
+                'inputcolor': '#181818',
+                'inputbtncolor': '#181818',
+                'inputreadycolor': '#131313',
+                'gradientanim': {
+                    'colors': ['#97d0ff', '#bdb9ff', '#deb0fd', '#febed7', '#ffd5a7'],
+                    'gradient': 'linear-gradient(90deg, #97d0ff, #bdb9ff, #deb0fd, #febed7, #ffd5a7, #febed7, #d9b0ff, #97d0ff, #97d0ff)'}
             },
             fontFamily: {
                 sans: ['Nunito', ...defaultTheme.fontFamily.sans],
@@ -23,7 +27,27 @@ export default {
             },
             letterSpacing: {
                 heading: '.01em',
-            }
+            },
+            animation: {
+                'gradient-x': 'gradient-x 10s linear infinite',
+                'gradient-x-slow': 'gradient-x 20s linear infinite'
+              },
+              keyframes: {
+                'gradient-x': {
+                  '0%': {
+                    'background-size': '200% 200%',
+                    'background-position': '200% center'
+                  },
+                  '50%': {
+                    'background-size': '200% 200%',
+                    'background-position': '100% center'
+                  },
+                  '100%': {
+                    'background-size': '200% 200%',
+                    'background-position': '00% center'
+                  },
+                },
+              },
         },
     },
     plugins: [],

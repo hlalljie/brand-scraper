@@ -38,20 +38,23 @@ interface FontData {
 
 const Home = (): JSX.Element => {
     const [input, setInput] = useState("");
+    const [currentSite, setCurrentSite] = useState("");
     const [loading, setLoading] = useState(false);
     const [resData, setResData] = useState(null);
 
     const handleSearch = () => {
         const fetchAddress = "/api/find-styles";
         // const fetchAddress = "api/test";
-
+        const tempInput = input;
+        setCurrentSite(tempInput);
         setLoading(true);
+        setInput("");
         fetch(fetchAddress, {
             method: "Post",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: input }),
+            body: JSON.stringify({ url: input, loadTime: 5 }),
         })
             .then((res) => res.json())
             .then((data) => {
@@ -61,43 +64,71 @@ const Home = (): JSX.Element => {
     };
 
     return (
-        <div id='main' className="relative h-screen grid grid-rows-[auto_1fr_auto]" >
-            <div id='header' className="p-3">
+        <div id='main' className="background-gradient animate-gradient-x-slow relative h-screen grid grid-rows-[auto_1fr_auto]" >
+            <section id='header' className="p-3">
                 <h1>Style Finder</h1>
-            </div>
+            </section>
             {(!resData) ?
-                <div id='content-container' className="max-w-md mt-[30vh]">
-                    {loading ? <Loading /> : <h2 id="intro" className='text-center'>Search a website for its brand colors and fonts.</h2>
+                <section id='content-container' className="max-w-md mt-[30vh]">
+                    {
+                        loading ? <Loading currentSite={currentSite} /> :
+                            <h2 id="intro" className='text-center heading-gradient'>Search a website for its brand colors and fonts.</h2>
                     }
 
 
-                </div> :
-                <div id='content-container' className="pt-10 max-w-2xl w-full">
+                </section> :
+                <section id='content-container' className="pt-10 max-w-2xl w-full">
                     {resData ? <ResultsDisplay resData={resData} /> : null}
-                    {loading && <Loading withContent />}
-                </div>
+                    {loading && <Loading withContent currentSite={currentSite} />}
+                </section>
             }
-            <section id='input-container' className="w-full ">
-                <div id='input ' className="mx-auto w-fit p-7">
-                    <input
-                        className="rounded-tl-sm rounded-bl-sm max-w-sm bg-inputcolor w-screen px-4 py-2 text-lg focus:outline-none"
-                        type="text"
-                        placeholder="Enter a website URL"
-                        onChange={(e) => setInput(e.target.value)}
-                    ></input>
-                    <button className='rounded-tr-sm rounded-br-sm bg-inputbtncolor px-4 py-2 text-lg text-gray-200 hover:text-white' onClick={handleSearch}>Search</button>
-                </div>
-            </section>
-        </div>
+            <InputContainer input={input} setInput={setInput} handleSearch={handleSearch} />
+        </div >
     );
 };
 
-const Loading = ({ withContent }: { withContent?: boolean }): JSX.Element => {
-    return <div id="loading-container" className={"text-center" + (withContent ? " mt-10" : "")}>
-        {(!withContent) && <h3 className="mb-4">Parsing Site Content</h3>}
-        <Loader2 className="animate-spin mx-auto" size={40} strokeWidth={2} />
+const Loading = ({ withContent, currentSite = "" }: { withContent?: boolean, currentSite?: string }): JSX.Element => {
+    return <div id="loading-container" className="text-center">
+        {<h3 className={"heading-gradient mb-4" + (withContent ? " mt-10" : "")}>Parsing Site Content for {currentSite}</h3>}
+        <svg
+            className="animate-spin mx-auto"
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <defs>
+                <linearGradient id="loader-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" />
+                    <stop offset="100%" />
+                </linearGradient>
+            </defs>
+            <Loader2 stroke="url(#loader-gradient)" strokeWidth="2" />
+        </svg>
     </div>;
 };
+
+const InputContainer = ({ input, setInput, handleSearch }: { input: string, setInput: React.Dispatch<React.SetStateAction<string>>, handleSearch: () => void }): JSX.Element => {
+    return (
+        <section id='input-container' className="w-full ">
+            <div id='input ' className="mx-auto w-fit p-7">
+                <input
+                    className="rounded-tl-sm rounded-bl-sm max-w-sm bg-inputcolor w-screen px-4 py-2 text-lg focus:outline-none"
+                    type="text"
+                    placeholder="Enter a website URL"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                ></input>
+                <button id='search' className={
+                    (input != "" ? 'bg-inputreadycolor ' : 'bg-inputbtncolor ') + 'rounded-tr-sm rounded-br-sm px-4 py-2 text-lg text-gray-200 hover:text-white'} onClick={handleSearch}
+                >
+                    <a className={input != "" ? "heading-gradient" : ""}>Search</a>
+                </button>
+            </div>
+        </section >
+    )
+}
 
 const ResultsDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
     return (
