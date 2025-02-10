@@ -113,9 +113,9 @@ const Loading = ({ withContent, currentSite = "" }: { withContent?: boolean, cur
 const InputContainer = ({ input, setInput, handleSearch }: { input: string, setInput: React.Dispatch<React.SetStateAction<string>>, handleSearch: () => void }): JSX.Element => {
     return (
         <section id='input-container' className="w-full ">
-            <div id='input ' className="mx-auto w-fit p-7">
+            <div id='input ' className="mx-auto w-screen p-7 flex justify-center">
                 <input
-                    className="rounded-tl-sm rounded-bl-sm max-w-sm bg-inputcolor w-screen px-4 py-2 text-lg focus:outline-none"
+                    className="flex-1 rounded-tl-sm rounded-bl-sm max-w-sm bg-inputcolor px-4 py-2 text-lg focus:outline-none"
                     type="text"
                     placeholder="Enter a website URL"
                     value={input}
