@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    /* Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+}
+
 html{
     @apply bg-backgroundcolor text-textcolor font-sans;
 }
@@ -34,7 +46,7 @@ h5{
     font-size: 1.4rem;
 }
 #content-container{
-    @apply p-4 mx-auto;
+    @apply p-4 mx-auto overflow-auto no-scrollbar;
 }
 /* #color-panel #color-name{
     visibility: visible;

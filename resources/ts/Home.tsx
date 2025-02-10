@@ -55,7 +55,7 @@ const Home = (): JSX.Element => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: input, testNumber: 0, loadTime: 2 }),
+            body: JSON.stringify({ url: input, testNumber: 0, loadTime: 1 }),
         })
             .then((res) => res.json())
             .then((data) => {
@@ -175,8 +175,8 @@ const ColorDisplay = ({ colors }: { colors: ColorData }): JSX.Element => {
     return (
         <div id="color-display" className="mt-10">
             <div id='color-container' className="flex flex-wrap justify-space-between gap-8">
-                {Object.keys(colors).map((color) => (
-                    <ColorPanel key={color} color={color} />
+                {Object.entries(colors).map((color) => (
+                    <ColorPanel key={color[0]} color={color} />
                 ))}
             </div>
 
@@ -184,16 +184,19 @@ const ColorDisplay = ({ colors }: { colors: ColorData }): JSX.Element => {
     );
 };
 
-const ColorPanel = ({ color }: { color: string }): JSX.Element => {
-    const textColor = chroma(color).luminance() > 0.5 ? "black" : "white";
+const ColorPanel = ({ color }: { color: [string, string[]] }): JSX.Element => {
+    const colorName = color[0];
+    const colorLocs = color[1];
+    const textColor = chroma(colorName).luminance() > 0.5 ? "black" : "white";
     return (
         <div
             id="color-panel"
-            className="rounded-sm flex-1 min-w-[100px] max-w-[200px] aspect-square flex items-center justify-center"
-            style={{ backgroundColor: color }}
+            className="rounded-sm w-[calc(50%-1rem)] aspect-[2/1] flex flex-col items-center justify-center gap-2"
+            style={{ backgroundColor: colorName }}
         >
-            <h5 id="color-name" style={{ color: textColor }}>{color}</h5>
-        </div>
+            <h5 id="color-name" style={{ color: textColor }}>{colorName}</h5>
+            <p style={{ color: textColor }}>{colorLocs.join(", ")}</p>
+        </div >
     )
 }
 
