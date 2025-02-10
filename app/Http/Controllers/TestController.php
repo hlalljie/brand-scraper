@@ -52,7 +52,11 @@ class TestController extends Controller
                 ],
                 "parsedData" => 'fake parsed data',
             ],
+            [
+                "received" => "badurl",
+                "error" => "badurl is not a valid URL"
+            ]
         ];
-        return response()->json($testResponses[0]);
+        return response()->json($testResponses[$testNumber]);
     }
 }

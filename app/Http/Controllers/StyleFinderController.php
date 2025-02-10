@@ -57,14 +57,14 @@ class StyleFinderController extends Controller
                 'url' => 'required|url|active_url'
             ]);
         } catch (ValidationException $e) {
-            throw new UrlValidationException("URL not valid");
+            throw new UrlValidationException($url ." is not a valid URL");
         }
 
         // Block dangerous urls
         $urlData = parse_url($validatedUrl["url"]);
         $host = $urlData['host'] ?? '';
         if ($host === 'localhost' || $host === '127.0.0.1') {
-            throw new UrlValidationException('URL not allowed');
+            throw new UrlValidationException($url . ' is not an allowed URL');
         }
 
         // return validated url

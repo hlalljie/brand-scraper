@@ -28,6 +28,7 @@ h3{
 }
 h4{
     font-size: 1.6rem;
+    font-weight: 200;
 }
 h5{
     font-size: 1.4rem;
@@ -35,12 +36,12 @@ h5{
 #content-container{
     @apply p-4 mx-auto;
 }
-#color-panel #color-name{
-    visibility: hidden;
-}
-#color-panel:hover #color-name{
+/* #color-panel #color-name{
     visibility: visible;
-}
+} */
+/* #color-panel:hover #color-name{
+    visibility: visible;
+} */
 .heading-gradient{
     @apply text-transparent animate-gradient-x bg-clip-text;
     background-image: theme('colors.gradientanim.gradient');

@@ -45,6 +45,7 @@ const Home = (): JSX.Element => {
     const handleSearch = () => {
         const fetchAddress = "/api/find-styles";
         // const fetchAddress = "api/test";
+
         const tempInput = input;
         setCurrentSite(tempInput);
         setLoading(true);
@@ -54,7 +55,7 @@ const Home = (): JSX.Element => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: input, loadTime: 5 }),
+            body: JSON.stringify({ url: input, testNumber: 1, loadTime: 2 }),
         })
             .then((res) => res.json())
             .then((data) => {
@@ -78,7 +79,7 @@ const Home = (): JSX.Element => {
 
                 </section> :
                 <section id='content-container' className="pt-10 max-w-2xl w-full">
-                    {resData ? <ResultsDisplay resData={resData} /> : null}
+                    {resData ? <ResultsDisplay resData={resData} loading={loading} /> : null}
                     {loading && <Loading withContent currentSite={currentSite} />}
                 </section>
             }
@@ -130,11 +131,12 @@ const InputContainer = ({ input, setInput, handleSearch }: { input: string, setI
     )
 }
 
-const ResultsDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
+const ResultsDisplay = ({ resData, loading }: { resData: ResultData, loading?: boolean }): JSX.Element => {
     return (
         <div className="resultsDisplay">
             {resData.error ? (
-                <ErrorDisplay error={resData.error} />
+                !loading && (<ErrorDisplay error={resData.error}
+                />)
             ) : resData.brandData ? (
                 <DataDisplay resData={resData} />
             ) : (
@@ -145,13 +147,17 @@ const ResultsDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
 };
 
 const ErrorDisplay = ({ error }: { error: Error }): JSX.Element => {
-    return <div className="errorDisplay"><p>{error.toString()}</p></div>;
+    return (
+        <div id="error-display" className="mt-[30vh]">
+            <h3 className="text-center heading-gradient">{"Error: " + error.toString() + "."} < br /> Try Again</h3>
+        </div>
+    );
 };
 
 const DataDisplay = ({ resData }: { resData: ResultData }): JSX.Element => {
     return (
         <div id="data-display">
-            <h3 className="text-center">Branding for {resData.received}</h3>
+            <h3 className="text-center">Website Styles for {resData.received}</h3>
             {resData.brandData!.colors ? (
                 <ColorDisplay colors={resData.brandData!.colors} />
             ) : null}
@@ -193,10 +199,9 @@ const ColorPanel = ({ color }: { color: string }): JSX.Element => {
 
 const FontDisplay = ({ fonts }: { fonts: FontData }): JSX.Element => {
     return (
-        <div id="font-display" className="mt-10 text-center">
-            <h4>
-                {"Fonts: " + Object.keys(fonts).join(', ')}
-            </h4>
+        <div id="font-display" className="mt-10 text-left">
+            <h3>Fonts:</h3>
+            <h4>{Object.keys(fonts).join(', ')}</h4>
         </div>
     );
 };
