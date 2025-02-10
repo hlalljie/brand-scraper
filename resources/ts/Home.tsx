@@ -43,8 +43,8 @@ const Home = (): JSX.Element => {
     const [resData, setResData] = useState(null);
 
     const handleSearch = () => {
-        // const fetchAddress = "/api/find-styles";
-        const fetchAddress = "api/test";
+        const fetchAddress = "/api/find-styles";
+        // const fetchAddress = "api/test";
 
         const tempInput = input;
         setCurrentSite(tempInput);
