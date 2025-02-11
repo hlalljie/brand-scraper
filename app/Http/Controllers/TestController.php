@@ -37,18 +37,6 @@ class TestController extends Controller
             $loadTime = $request->input('loadTime');
         }
 
-        dispatch(function () use ($loadTime, $tracker) {
-            for ($i = 1; $i <= $loadTime; $i++) {
-                $tracker->update(['progress' => ['time' => $i, 'done' => false]]);
-                sleep(1);
-            }
-            $tracker->update(['progress' => ['time' => $i, 'done' => true]]);
-        });
-
-        return response()->json([
-            'tracker' => $tracker->id
-        ]);
-
         $testResponses = [
             [
                 "received" => "example.com",
@@ -72,6 +60,20 @@ class TestController extends Controller
                 "error" => "badurl is not a valid URL"
             ]
         ];
+
+        dispatch(function () use ($loadTime, $tracker, $testNumber, $testResponses) {
+            for ($i = 1; $i <= $loadTime; $i++) {
+                $tracker->update(['progress' => ['time' => $i, 'done' => false]]);
+                sleep(1);
+            }
+            $tracker->update(['progress' => ['time' => $i, 'done' => true, 'resultData' => $testResponses[$testNumber]]]);
+        });
+
+        return response()->json([
+            'tracker' => $tracker->id
+        ]);
+
+
         // return response()->json($testResponses[$testNumber]);
     }
     public function checkProgress($trackerId)

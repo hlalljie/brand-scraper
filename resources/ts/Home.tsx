@@ -55,15 +55,42 @@ const Home = (): JSX.Element => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: input, testNumber: 0, loadTime: 100 }),
+            body: JSON.stringify({ url: input, testNumber: 0, loadTime: 10 }),
         })
             .then((res) => res.json())
             .then((data) => {
                 console.log(data);
+                // TODO add type check for data to have id
+                pollForUpdates(data.tracker.toString(), 1);
                 // setResData(new ResultData(data) as React.SetStateAction<null>);
-                setLoading(false);
+                // setLoading(false);
             });
     };
+    const pollForUpdates = (trackingId: string, interval: number = 5, timeout: number = 60) => {
+        const fetchAddress = "api/test/progress/" + trackingId;
+        const poll = () => {
+            fetch(fetchAddress, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+                    if (data.progress.done) {
+                        setLoading(false);
+                    } else {
+                        // Schedule next poll if not done
+                        setTimeout(poll, interval * 1000);
+                    }
+                });
+        };
+
+        // Start polling
+        poll();
+
+    }
 
     return (
         <div id='main' className="background-gradient animate-gradient-x-slow relative h-screen grid grid-rows-[auto_1fr_auto]" >
