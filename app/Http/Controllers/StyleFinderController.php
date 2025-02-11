@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Models\ProgressTracker;
 use App\Services\WebScraper;
 use App\Services\OllamaParser;
 use Exception;
@@ -19,6 +20,7 @@ class StyleFinderController extends Controller
 
     private $timeout = 30;
     private $llmTimeout = 600;
+    private $chunkLength = 2000;
     private $scraper;
     private $ollamaParser;
 
@@ -57,7 +59,7 @@ class StyleFinderController extends Controller
                 'url' => 'required|url|active_url'
             ]);
         } catch (ValidationException $e) {
-            throw new UrlValidationException($url ." is not a valid URL");
+            throw new UrlValidationException($url . " is not a valid URL");
         }
 
         // Block dangerous urls
@@ -73,37 +75,71 @@ class StyleFinderController extends Controller
 
     public function index(Request $request)
     {
+        Log::info('Creating db tracker');
+        // Create progress tracker in database
+        $tracker = ProgressTracker::create();
+        Log::info('Finished Creating db tracker');
 
-        // validate and format url
-        try {
-            $url = $this->getUrl($request);
-        } catch (UrlValidationException $e) {
-            return response()->json(["error" => $e->getMessage()], 422);
-        }
+        // dispatch job to concurrent job queue
+        dispatch(function () use ($request, $tracker) {
 
-        Log::info($url . " validated");
+            // refresh tracker to prevent additional jobs
+            $newTracker = ProgressTracker::find($tracker->id);
 
-        // fetch html content
-        try {
-            $content = $this->scraper->scrapeUrl($url);
-        } catch (Exception $e) {
-            return response()->json(["error" => $e->getMessage()], $e->getCode());
-        }
+            // validate and format url
+            try {
+                $url = $this->getUrl($request);
+            } catch (UrlValidationException $e) {
+                $this->sendError($newTracker, $e);
+            }
 
-        Log::info($url . " parsed");
+            Log::info($url . " validated");
+            $newTracker->update(['status' => 'scraping']);
 
-        $chunkLength = 2000;
-        $contentChunk = substr($content, 0, $chunkLength);
+            // fetch html content
+            try {
+                $content = $this->scraper->scrapeUrl($url);
+            } catch (Exception $e) {
+                $this->sendError($newTracker, $e);
+            }
 
-        try {
-            $result = $this->ollamaParser->parse($content, $chunkLength);
-        } catch (Exception $e) {
-            return response()->json(["error" => $e->getMessage()]);
-        }
+            Log::info($url . " parsed");
+            // find chunk size
+
+            $contentChunk = substr($content, 0, $this->chunkLength);
+            $totalChunks = ceil(strlen($content) / $this->chunkLength);
+            $completedChunks = 0;
+
+            $newTracker->update(['status' => 'parsing', 'chunks' => $totalChunks]);
+
+            // parse content
+            try {
+                $result = $this->ollamaParser->parse($content, $this->chunkLength);
+            } catch (Exception $e) {
+                return response()->json(["error" => $e->getMessage()]);
+            }
+
+            Log::info($url . " parsed");
+            $newTracker->update(['done' => true, 'results' => $result, 'status' => 'done', 'completed_chunks' => $completedChunks]);
+        });
+
+        return response()->json(["tracker" => $tracker->id]);
 
 
 
         //return response
-        return response()->json(["received" => $url, 'brandData' => $result, "parsedData" => $contentChunk]);
+        // return response()->json(["received" => $url, 'brandData' => $result, "parsedData" => $contentChunk]);
+    }
+
+    private function sendError($tracker, $error)
+    {
+        $tracker->update(['done' => true, 'status' => 'error', 'results' => ["error" => $error->getMessage()]]);
+        throw $error;
+    }
+
+    public function checkProgress($trackerId)
+    {
+        $tracker = ProgressTracker::find($trackerId);
+        return response()->json($tracker);
     }
 }

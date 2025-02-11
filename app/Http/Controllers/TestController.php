@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ProgressTracker;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Exception;
 
 
@@ -48,8 +47,6 @@ class TestController extends Controller
                         "Open Sans" => ["paragraph"],
                     ]
                 ],
-                'completeChunks' => 2,
-                'totalChunks' => 2,
                 "parsedData" => 'fake parsed data',
             ],
             [
@@ -69,14 +66,12 @@ class TestController extends Controller
                         "Inter" => ["heading"],
                     ]
                 ],
-                'completeChunks' => 1,
-                'totalChunks' => 2,
                 "parsedData" => 'fake parsed data',
             ],
         ];
         Log::info('Creating db tracker');
         // Create progress tracker in database
-        $tracker = ProgressTracker::create();
+        $tracker = ProgressTracker::create(['status' => 'scraping']);
         Log::info('Finished Creating db tracker');
 
         // dispatch job to concurrent job queue
@@ -86,23 +81,21 @@ class TestController extends Controller
             $newTracker = ProgressTracker::find($tracker->id);
             // sleep over time and update
             sleep($loadTime / 3);
-            // simulate scraping task
-            $newTracker->update(['status' => 'scraping']);
+            // simulate start parsing task
+            $newTracker->update(['status' => 'parsing', 'total_batches' => 2]);
             sleep($loadTime / 3);
             // simulate parsing partial update
-            $newTracker->update(['results' => $testResponses[2], 'status' => 'parsing']);
+            $newTracker->update(['results' => $testResponses[2], 'status' => 'parsing', 'completed_batches' => 1]);
             sleep($loadTime / 3);
             // wrap up at the end
-            $newTracker->update(['done' => true, 'results' => $testResponses[$testNumber], 'status' => 'done']);
+            $newTracker->update(['done' => true, 'results' => $testResponses[$testNumber], 'status' => 'done', 'completed_batches' => 2]);
         });
 
         return response()->json([
             'tracker' => $tracker->id
         ]);
-
-
-        // return response()->json($testResponses[$testNumber]);
     }
+
     public function checkProgress($trackerId)
     {
         $tracker = ProgressTracker::find($trackerId);

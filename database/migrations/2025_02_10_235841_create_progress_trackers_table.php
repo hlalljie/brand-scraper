@@ -16,6 +16,8 @@ return new class extends Migration
             $table->boolean('done')->default(false);
             $table->string('status')->default('validating');
             $table->json('results')->nullable();
+            $table->integer('completed_batches')->default(0);
+            $table->integer('total_batches')->default(0);
             $table->timestamps();  // Gives you created_at and updated_at
         });
     }

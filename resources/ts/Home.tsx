@@ -7,8 +7,6 @@ class ResultData {
     error?: Error;
     received?: string;
     brandData?: BrandData;
-    completeChunks?: number = 0;
-    totalChunks?: number;
     parsedData?: string;
 
     constructor(resData: any) {
@@ -16,8 +14,6 @@ class ResultData {
         resData.received && (this.received = resData.received);
         resData.brandData &&
             (this.brandData = new BrandData(resData.brandData));
-        resData.completeChunks && (this.completeChunks = resData.completeChunks);
-        resData.totalChunks && (this.totalChunks = resData.totalChunks);
         resData.parsedData && (this.parsedData = resData.parsedData);
     }
 }
@@ -46,6 +42,8 @@ const Home = (): JSX.Element => {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState("");
     const [resData, setResData] = useState(null);
+    const [completedBatches, setCompletedBatches] = useState(0);
+    const [totalBatches, setTotalBatches] = useState(0);
 
     const handleSearch = () => {
         // const fetchAddress = "/api/find-styles";
@@ -53,6 +51,7 @@ const Home = (): JSX.Element => {
 
         const tempInput = input;
         setCurrentSite(tempInput);
+        setStatus("");
         setLoading(true);
         setInput("");
         fetch(fetchAddress, {
@@ -71,6 +70,8 @@ const Home = (): JSX.Element => {
     };
     const pollForUpdates = (trackingId: string, interval: number = 5, timeout: number = 60) => {
         const fetchAddress = "api/test/progress/" + trackingId;
+        // const fetchAddress = "api/progress/" + trackingId;
+
         let lastUpdate = "";
         const poll = () => {
             fetch(fetchAddress, {
@@ -85,6 +86,8 @@ const Home = (): JSX.Element => {
                     // Wait for request to finish
                     if (data.done) {
                         setLoading(false);
+                        setStatus(data.status);
+
                         // If there are results display them
                         if (data.results) {
                             console.log("Results complete:", data);
@@ -96,12 +99,23 @@ const Home = (): JSX.Element => {
                             lastUpdate = data.updated_at;
                             // Schedule next poll if not done
                             if (data.results) {
-                                console.log("Results updated:", data);
                                 setResData(new ResultData(data.results) as React.SetStateAction<null>);
+                                console.log("Results updated:", data);
                             }
-                            else if (data.status !== status) {
+                            // check if status has changed
+                            if (data.status !== status) {
                                 setStatus(data.status);
                                 console.log("Status updated:", data);
+                            }
+                            // check if batches have changed
+                            if (data.completed_batches !== completedBatches) {
+                                setCompletedBatches(data.completed_batches);
+                                console.log("Complete batches updated:", data);
+                            }
+                            // check if batches have changed
+                            if (data.total_batches !== totalBatches) {
+                                setTotalBatches(data.total_batches);
+                                console.log("Total batches updated:", data);
                             }
 
                         }
@@ -123,7 +137,7 @@ const Home = (): JSX.Element => {
             {(!resData) ?
                 <section id='content-container' className="max-w-md mt-[30vh]">
                     {
-                        loading ? <Loading currentSite={currentSite} /> :
+                        loading ? <Loading currentSite={currentSite} status={status} completedBatches={completedBatches} totalBatches={totalBatches} /> :
                             <h2 id="intro" className='text-center heading-gradient'>Search a website for its brand colors and fonts.</h2>
                     }
 
@@ -131,7 +145,7 @@ const Home = (): JSX.Element => {
                 </section> :
                 <section id='content-container' className="pt-10 max-w-2xl w-full">
                     {resData ? <ResultsDisplay resData={resData} loading={loading} /> : null}
-                    {loading && <Loading withContent currentSite={currentSite} />}
+                    {loading && <Loading withContent currentSite={currentSite} status={status} completedBatches={completedBatches} totalBatches={totalBatches} />}
                 </section>
             }
             <InputContainer input={input} setInput={setInput} handleSearch={handleSearch} />
@@ -139,9 +153,31 @@ const Home = (): JSX.Element => {
     );
 };
 
-const Loading = ({ withContent, currentSite = "" }: { withContent?: boolean, currentSite?: string }): JSX.Element => {
+const Loading = ({ withContent, currentSite = "", status = "validating", completedBatches = 0, totalBatches = 0 }: { withContent?: boolean, currentSite?: string, status?: string, completedBatches?: number, totalBatches?: number }): JSX.Element => {
+    let message = "";
+    if (status === "validating") {
+        message = "Validating";
+    }
+    else if (status === "scraping") {
+        message = "Scraping site content for";
+    }
+    else if (status === "parsing") {
+        message = "Parsing site content for (batch " + completedBatches + "/" + totalBatches + ")";
+    }
+    else if (status === "done") {
+        message = "Completed finding site contnent for "
+    }
+    else if (status === "error") {
+        message = "Error finding site content for"
+    }
+    else if (status === "timeout") {
+        message = "Timeout finding site content for"
+    }
+    else {
+        message = "Starting to find site content for";
+    }
     return <div id="loading-container" className="text-center">
-        {<h3 className={"heading-gradient mb-4" + (withContent ? " mt-10" : "")}>Parsing Site Content for {currentSite}</h3>}
+        {<h3 className={"heading-gradient mb-4" + (withContent ? " mt-10" : "")}>{message} {currentSite}</h3>}
         <svg
             className="animate-spin mx-auto"
             width="40"
