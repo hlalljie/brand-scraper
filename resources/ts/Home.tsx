@@ -43,8 +43,8 @@ const Home = (): JSX.Element => {
     const [resData, setResData] = useState(null);
 
     const handleSearch = () => {
-        const fetchAddress = "/api/find-styles";
-        // const fetchAddress = "api/test";
+        // const fetchAddress = "/api/find-styles";
+        const fetchAddress = "api/test";
 
         const tempInput = input;
         setCurrentSite(tempInput);
@@ -55,11 +55,12 @@ const Home = (): JSX.Element => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ url: input, testNumber: 0, loadTime: 1 }),
+            body: JSON.stringify({ url: input, testNumber: 0, loadTime: 100 }),
         })
             .then((res) => res.json())
             .then((data) => {
-                setResData(new ResultData(data) as React.SetStateAction<null>);
+                console.log(data);
+                // setResData(new ResultData(data) as React.SetStateAction<null>);
                 setLoading(false);
             });
     };

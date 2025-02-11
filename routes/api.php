@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('find-styles', [App\Http\Controllers\StyleFinderController::class, 'index'])->name('styleFinder');
 Route::post('test', [App\Http\Controllers\TestController::class, 'index'])->name('test');
+Route::get('/test/progress/{trackerId}', [App\Http\Controllers\TestController::class, 'checkProgress']);
