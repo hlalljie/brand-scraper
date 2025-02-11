@@ -30,6 +30,7 @@ services:
                 touch database/database.sqlite
                 
                 # Set up queue table and run migrations
+                php artisan cache:table
                 php artisan queue:table
                 php artisan migrate --force
                 

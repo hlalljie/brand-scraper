@@ -6,9 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProgressTracker extends Model
 {
-    protected $fillable = ['progress'];
+    protected $fillable = [
+        'done',
+        'results'
+    ];
 
     protected $casts = [
-        'progress' => 'array'
+        'done' => 'boolean',
+        'results' => 'array'
     ];
 }

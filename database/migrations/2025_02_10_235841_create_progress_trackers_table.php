@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('progress_trackers', function (Blueprint $table) {
             $table->id();
-            $table->json('progress')->nullable();
+            $table->boolean('done')->default(false);
+            $table->json('results')->nullable();
             $table->timestamps();  // Gives you created_at and updated_at
         });
     }

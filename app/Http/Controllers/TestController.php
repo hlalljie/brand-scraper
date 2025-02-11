@@ -22,11 +22,6 @@ class TestController extends Controller
         $testNumber = 0;
         $loadTime = 0;
 
-        // Create progress tracker in database
-        $tracker = ProgressTracker::create([
-            'progress' => ['time' => 0, 'done' => false]
-        ]);
-
         // load test number
         if (array_key_exists('testNumber', $request->all())) {
             $testNumber = $request->input('testNumber');
@@ -58,15 +53,40 @@ class TestController extends Controller
             [
                 "received" => "badurl",
                 "error" => "badurl is not a valid URL"
-            ]
+            ],
+            [
+                "received" => "example.com",
+                'brandData' =>
+                [
+                    "colors" =>
+                    [
+                        "#fdfdff" => ["div"],
+                        "#38488f" => ["a:link"],
+                    ],
+                    "fonts" => [
+                        "Inter" => ["heading"],
+                    ]
+                ],
+                "parsedData" => 'fake parsed data',
+            ],
         ];
+        Log::info('Creating db tracker');
+        // Create progress tracker in database
+        $tracker = ProgressTracker::create();
+        Log::info('Finished Creating db tracker');
 
+        // dispatch job to concurrent job queue
         dispatch(function () use ($loadTime, $tracker, $testNumber, $testResponses) {
-            for ($i = 1; $i <= $loadTime; $i++) {
-                $tracker->update(['progress' => ['time' => $i, 'done' => false]]);
-                sleep(1);
-            }
-            $tracker->update(['progress' => ['time' => $i, 'done' => true, 'resultData' => $testResponses[$testNumber]]]);
+            Log::info('Job started');  // Add this
+            // refresh tracker to prevent additional jobs
+            $newTracker = ProgressTracker::find($tracker->id);
+            // sleep over time and update
+            sleep($loadTime / 2);
+            $newTracker->update(['results' => $testResponses[2]]);
+            sleep($loadTime / 2);
+            // wrap up at eh end
+            $newTracker->update(['done' => true, 'results' => $testResponses[$testNumber]]);
+            Log::info('Job finished');
         });
 
         return response()->json([
@@ -79,8 +99,6 @@ class TestController extends Controller
     public function checkProgress($trackerId)
     {
         $tracker = ProgressTracker::find($trackerId);
-        return response()->json([
-            'progress' => $tracker->progress
-        ]);
+        return response()->json($tracker);
     }
 }

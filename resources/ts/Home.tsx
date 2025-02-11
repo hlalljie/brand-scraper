@@ -62,12 +62,11 @@ const Home = (): JSX.Element => {
                 console.log(data);
                 // TODO add type check for data to have id
                 pollForUpdates(data.tracker.toString(), 1);
-                // setResData(new ResultData(data) as React.SetStateAction<null>);
-                // setLoading(false);
             });
     };
     const pollForUpdates = (trackingId: string, interval: number = 5, timeout: number = 60) => {
         const fetchAddress = "api/test/progress/" + trackingId;
+        let lastUpdate = "";
         const poll = () => {
             fetch(fetchAddress, {
                 method: "GET",
@@ -77,11 +76,26 @@ const Home = (): JSX.Element => {
             })
                 .then((res) => res.json())
                 .then((data) => {
-                    console.log(data);
-                    if (data.progress.done) {
+                    // TODO: add option to timeout
+                    // Wait for request to finish
+                    if (data.done) {
                         setLoading(false);
+                        // If there are results display them
+                        if (data.results) {
+                            console.log("Results complete:", data);
+
+                            setResData(new ResultData(data.results) as React.SetStateAction<null>);
+                        }
                     } else {
-                        // Schedule next poll if not done
+                        if (lastUpdate !== data.updated_at) {
+                            lastUpdate = data.updated_at;
+                            // Schedule next poll if not done
+                            if (data.results) {
+                                console.log("Results updated:", data);
+                                setResData(new ResultData(data.results) as React.SetStateAction<null>);
+                            }
+
+                        }
                         setTimeout(poll, interval * 1000);
                     }
                 });
