@@ -48,6 +48,8 @@ class TestController extends Controller
                         "Open Sans" => ["paragraph"],
                     ]
                 ],
+                'completeChunks' => 2,
+                'totalChunks' => 2,
                 "parsedData" => 'fake parsed data',
             ],
             [
@@ -67,6 +69,8 @@ class TestController extends Controller
                         "Inter" => ["heading"],
                     ]
                 ],
+                'completeChunks' => 1,
+                'totalChunks' => 2,
                 "parsedData" => 'fake parsed data',
             ],
         ];

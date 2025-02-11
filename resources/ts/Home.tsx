@@ -7,6 +7,8 @@ class ResultData {
     error?: Error;
     received?: string;
     brandData?: BrandData;
+    completeChunks?: number = 0;
+    totalChunks?: number;
     parsedData?: string;
 
     constructor(resData: any) {
@@ -14,6 +16,8 @@ class ResultData {
         resData.received && (this.received = resData.received);
         resData.brandData &&
             (this.brandData = new BrandData(resData.brandData));
+        resData.completeChunks && (this.completeChunks = resData.completeChunks);
+        resData.totalChunks && (this.totalChunks = resData.totalChunks);
         resData.parsedData && (this.parsedData = resData.parsedData);
     }
 }
