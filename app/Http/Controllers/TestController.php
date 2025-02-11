@@ -77,16 +77,19 @@ class TestController extends Controller
 
         // dispatch job to concurrent job queue
         dispatch(function () use ($loadTime, $tracker, $testNumber, $testResponses) {
-            Log::info('Job started');  // Add this
+
             // refresh tracker to prevent additional jobs
             $newTracker = ProgressTracker::find($tracker->id);
             // sleep over time and update
-            sleep($loadTime / 2);
-            $newTracker->update(['results' => $testResponses[2]]);
-            sleep($loadTime / 2);
-            // wrap up at eh end
-            $newTracker->update(['done' => true, 'results' => $testResponses[$testNumber]]);
-            Log::info('Job finished');
+            sleep($loadTime / 3);
+            // simulate scraping task
+            $newTracker->update(['status' => 'scraping']);
+            sleep($loadTime / 3);
+            // simulate parsing partial update
+            $newTracker->update(['results' => $testResponses[2], 'status' => 'parsing']);
+            sleep($loadTime / 3);
+            // wrap up at the end
+            $newTracker->update(['done' => true, 'results' => $testResponses[$testNumber], 'status' => 'done']);
         });
 
         return response()->json([

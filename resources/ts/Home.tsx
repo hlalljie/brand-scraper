@@ -40,6 +40,7 @@ const Home = (): JSX.Element => {
     const [input, setInput] = useState("");
     const [currentSite, setCurrentSite] = useState("");
     const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState("");
     const [resData, setResData] = useState(null);
 
     const handleSearch = () => {
@@ -93,6 +94,10 @@ const Home = (): JSX.Element => {
                             if (data.results) {
                                 console.log("Results updated:", data);
                                 setResData(new ResultData(data.results) as React.SetStateAction<null>);
+                            }
+                            else if (data.status !== status) {
+                                setStatus(data.status);
+                                console.log("Status updated:", data);
                             }
 
                         }
