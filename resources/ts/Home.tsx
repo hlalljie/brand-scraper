@@ -46,8 +46,8 @@ const Home = (): JSX.Element => {
     const [totalBatches, setTotalBatches] = useState(0);
 
     const handleSearch = () => {
-        // const fetchAddress = "/api/find-styles";
-        const fetchAddress = "api/test";
+        const fetchAddress = "/api/find-styles";
+        // const fetchAddress = "api/test";
 
         const tempInput = input;
         setCurrentSite(tempInput);
@@ -69,8 +69,8 @@ const Home = (): JSX.Element => {
             });
     };
     const pollForUpdates = (trackingId: string, interval: number = 5, timeout: number = 60) => {
-        const fetchAddress = "api/test/progress/" + trackingId;
-        // const fetchAddress = "api/progress/" + trackingId;
+        // const fetchAddress = "api/test/progress/" + trackingId;
+        const fetchAddress = "api/progress/" + trackingId;
 
         let lastUpdate = "";
         const poll = () => {
@@ -162,7 +162,7 @@ const Loading = ({ withContent, currentSite = "", status = "validating", complet
         message = "Scraping site content for";
     }
     else if (status === "parsing") {
-        message = "Parsing site content for (batch " + completedBatches + "/" + totalBatches + ")";
+        message = "Parsing site content for (" + completedBatches + "/" + totalBatches + " done)";
     }
     else if (status === "done") {
         message = "Completed finding site contnent for "
