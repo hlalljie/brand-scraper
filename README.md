@@ -76,7 +76,13 @@ If serve is not running, use `ollama serve`
 If the model is running and it is still stuck on validation then the issue is likely in the service worker.
 
 #### Check Service worker by using `ps aux | grep queue`
-This should show a single service worker process called 
+This should show a single service worker process called `php artisan queue:work`
+
+If the process does not show then clear the queue: `php artisan queue:clear` then start a worker `php artisan queue:work &`. You will need to reload your client session.
+
+If the process does show then check the logs with `tail storage/logs/laravel.log`
+
+If no solution presents itself try a reboot by using docker compose down, and delete the associate volumes.
 
 ### Ollama error
 #### Check Ollama by using `ps aux | grep ollama`. 
