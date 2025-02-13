@@ -233,10 +233,10 @@ const Loading = ({ withContent, currentSite = "", status = "validating", complet
         message = "Scraping site content for";
     }
     else if (status === "parsing") {
-        message = "Parsing site content for (" + completedBatches + "/" + totalBatches + " done)";
+        message = "Parsing site content for";
     }
     else if (status === "done") {
-        message = "Completed finding site contnent for "
+        message = "Completed finding site contnent for"
     }
     else if (status === "error") {
         message = "Error finding site content for"
@@ -248,7 +248,12 @@ const Loading = ({ withContent, currentSite = "", status = "validating", complet
         message = "Starting to find site content for";
     }
     return <div id="loading-container" className="text-center">
-        {<h3 className={"heading-gradient mb-4" + (withContent ? " mt-10" : "")}>{message} {currentSite}</h3>}
+        {<h3 className={"heading-gradient mb-4" + (withContent ? " mt-10" : "")}>{message} {currentSite} {status === "parsing" && (
+            <>
+                <br />
+                {`(${completedBatches}/${totalBatches} batches done)`}
+            </>
+        )}</h3>}
         <svg
             className="animate-spin mx-auto"
             width="40"
@@ -357,7 +362,7 @@ const ColorPanel = ({ color }: { color: [string, string[]] }): JSX.Element => {
     return (
         <div
             id="color-panel"
-            className="rounded-sm w-[calc(50%-1rem)] aspect-[2/1] flex flex-col items-center justify-center gap-2"
+            className="rounded-sm w-[calc(50%-1rem)] aspect-[2/1] flex flex-col items-center justify-center gap-2 p-5 text-center"
             style={{ backgroundColor: colorName }}
         >
             <h5 id="color-name" style={{ color: textColor }}>{colorName}</h5>
