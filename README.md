@@ -40,3 +40,26 @@ After entering a URL the server will parse the website for data then feed it to 
 After parsing the app will display the results with color previews.
 
 ![Results Screen](./docs/assets/stylefinder_results.png)
+
+## Useful Commands
+
+### Backend
+
+See Laravel Logs: `cat storage/logs/laravel.log`
+
+Create a php worker: `php artisan queue:work &`
+
+Clear waiting jobs: `php artisan queue:clear`
+
+CHeck if workers are running `cat /proc/*/cmdline 2>/dev/null | grep "queue:work"`
+
+
+#### Database
+To reset the database, delete is, create it, then load it with a migration, then restart your php worker (above).
+
+Delete DB: `rm database/database.sqlite`
+
+Create DB: `touch database/database.sqlite`
+
+Migrate database: `php artisan migrate`
+

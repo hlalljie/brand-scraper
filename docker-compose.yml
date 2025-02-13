@@ -20,13 +20,23 @@ services:
             - HOST=0.0.0.0
         command: |
             sh -c "
-              # Create .env if it doesn't exist
-              if [ ! -f /style-finder/.env ]; then
-                cp /style-finder/.env.example /style-finder/.env
-                php artisan key:generate
-              fi
-              # Start services
-              ollama serve &
-              php artisan serve --host=0.0.0.0 --port=8000 &
-              npm run dev -- --host 0.0.0.0"
+                # Create .env if it doesn't exist
+                if [ ! -f /style-finder/.env ]; then
+                    cp /style-finder/.env.example /style-finder/.env
+                    php artisan key:generate
+                fi
+                
+                # Create SQLite database if it doesn't exist
+                touch database/database.sqlite
+                
+                # Set up queue table and run migrations
+                php artisan cache:table
+                php artisan queue:table
+                php artisan migrate --force
+                
+                # Start services
+                ollama serve &
+                php artisan serve --host=0.0.0.0 --port=8000 &
+                php artisan queue:work &
+                npm run dev -- --host 0.0.0.0"
         restart: always
