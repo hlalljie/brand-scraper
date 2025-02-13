@@ -11,7 +11,8 @@ class ProgressTracker extends Model
         'status',
         'results',
         'completed_batches',
-        'total_batches'
+        'total_batches',
+        'process_id'
     ];
 
     protected $casts = [
@@ -19,6 +20,7 @@ class ProgressTracker extends Model
         'status' => 'string',
         'results' => 'array',
         'completed_batches' => 'integer',
-        'total_batches' => 'integer'
+        'total_batches' => 'integer',
+        'process_id' => 'integer'
     ];
 }

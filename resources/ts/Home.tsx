@@ -1,17 +1,20 @@
 import { JSX, useState } from "react";
 import chroma from 'chroma-js';
-import { Loader2 } from 'lucide-react'
+import { Loader2, Square } from 'lucide-react'
 
 
 class ResultData {
     error?: Error;
     received?: string;
+    processId?: number;
     brandData?: BrandData;
     parsedData?: string;
+
 
     constructor(resData: any) {
         resData.error && (this.error = resData.error);
         resData.received && (this.received = resData.received);
+        resData.processId && (this.processId = resData.processId);
         resData.brandData &&
             (this.brandData = new BrandData(resData.brandData));
         resData.parsedData && (this.parsedData = resData.parsedData);
@@ -37,17 +40,24 @@ interface FontData {
 }
 
 const Home = (): JSX.Element => {
+
+    const testing = true;
+
     const [input, setInput] = useState("");
     const [currentSite, setCurrentSite] = useState("");
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState("");
+    const [apiPid, setApiPid]: [number | null, React.Dispatch<React.SetStateAction<null>> | React.Dispatch<React.SetStateAction<number>>] = useState(null);
+    const [abortController, setAbortController] = useState<AbortController | null>(null);
+
     const [resData, setResData] = useState(null);
     const [completedBatches, setCompletedBatches] = useState(0);
     const [totalBatches, setTotalBatches] = useState(0);
 
     const handleSearch = () => {
-        const fetchAddress = "/api/find-styles";
-        // const fetchAddress = "api/test";
+        const apiAddress = "/api/find-styles";
+        const testAddress = "/api/test";
+        const fetchAddress = testing ? testAddress : apiAddress;
 
         const tempInput = input;
         setCurrentSite(tempInput);
@@ -68,32 +78,49 @@ const Home = (): JSX.Element => {
                 pollForUpdates(data.tracker.toString(), 1);
             });
     };
+
+    // TODO: Correct past state issue in closure
     const pollForUpdates = (trackingId: string, interval: number = 5, timeout: number = 60) => {
-        // const fetchAddress = "api/test/progress/" + trackingId;
-        const fetchAddress = "api/progress/" + trackingId;
+        const apiAddress = "api/progress";
+        const testAddress = "api/test/progress";
+        const fetchAddress = (testing ? testAddress : apiAddress) + "/" + trackingId;
+
+        // If there's an existing controller, polling is already running
+        if (abortController) {
+            console.log("Polling already in progress");
+            return;
+        }
+        // otherwise create an new abort controller for the request
+        const newController = new AbortController();
+        setAbortController(newController);
 
         let lastUpdate = "";
         const poll = () => {
+
+            // Check if cancelled
             fetch(fetchAddress, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                signal: newController.signal
             })
                 .then((res) => res.json())
                 .then((data) => {
                     // TODO: add option to timeout
                     // Wait for request to finish
+                    // Check if done
                     if (data.done) {
                         setLoading(false);
-                        setStatus(data.status);
-
+                        setStatus("done"); // do explicitly so no race condition with cancellation
+                        setApiPid(null);
                         // If there are results display them
                         if (data.results) {
                             console.log("Results complete:", data);
-
                             setResData(new ResultData(data.results) as React.SetStateAction<null>);
                         }
+                        setAbortController(null);
+
                     } else {
                         if (lastUpdate !== data.updated_at) {
                             lastUpdate = data.updated_at;
@@ -101,6 +128,11 @@ const Home = (): JSX.Element => {
                             if (data.results) {
                                 setResData(new ResultData(data.results) as React.SetStateAction<null>);
                                 console.log("Results updated:", data);
+                            }
+                            //
+                            if (data.process_id !== apiPid) {
+                                setApiPid(data.process_id);
+                                console.log("API PID updated:", data);
                             }
                             // check if status has changed
                             if (data.status !== status) {
@@ -121,12 +153,47 @@ const Home = (): JSX.Element => {
                         }
                         setTimeout(poll, interval * 1000);
                     }
-                });
+                }).catch(err => {
+                    if (err.name === 'AbortError') {
+                        console.log("Polling aborted");
+                    } else {
+                        console.error("Polling error:", err);
+                    }
+                    setAbortController(null);
+                });;
         };
 
         // Start polling
         poll();
 
+    }
+
+    const handleStop = () => {
+
+        // Stop loading and polling
+        if (abortController) {
+            abortController.abort();
+            setAbortController(null);
+        }
+        setStatus("cancelled");
+        setLoading(false);
+
+        console.log("Cancelled");
+
+        // Send stop request
+        const apiAddress = "/api/stop";
+        const testAddress = "/api/test/stop";
+        console.log("Sending stop request to:", (testing ? testAddress : apiAddress) + "/" + apiPid);
+        const fetchAddress = (testing ? testAddress : apiAddress) + "/" + apiPid;
+
+        fetch(fetchAddress, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+
+        setApiPid(null);
     }
 
     return (
@@ -137,7 +204,7 @@ const Home = (): JSX.Element => {
             {(!resData) ?
                 <section id='content-container' className="max-w-md mt-[30vh]">
                     {
-                        loading ? <Loading currentSite={currentSite} status={status} completedBatches={completedBatches} totalBatches={totalBatches} /> :
+                        loading ? <Loading handleStop={handleStop} currentSite={currentSite} status={status} completedBatches={completedBatches} totalBatches={totalBatches} /> :
                             <h2 id="intro" className='text-center heading-gradient'>Search a website for its brand colors and fonts.</h2>
                     }
 
@@ -145,15 +212,19 @@ const Home = (): JSX.Element => {
                 </section> :
                 <section id='content-container' className="pt-10 max-w-2xl w-full">
                     {resData ? <ResultsDisplay resData={resData} loading={loading} /> : null}
-                    {loading && <Loading withContent currentSite={currentSite} status={status} completedBatches={completedBatches} totalBatches={totalBatches} />}
+                    {loading && <Loading handleStop={handleStop} withContent currentSite={currentSite} status={status} completedBatches={completedBatches} totalBatches={totalBatches} />}
                 </section>
+
             }
+            {apiPid ? <StopButton handleStop={handleStop} /> : null}
             <InputContainer input={input} setInput={setInput} handleSearch={handleSearch} />
         </div >
     );
 };
 
-const Loading = ({ withContent, currentSite = "", status = "validating", completedBatches = 0, totalBatches = 0 }: { withContent?: boolean, currentSite?: string, status?: string, completedBatches?: number, totalBatches?: number }): JSX.Element => {
+const Loading = ({ withContent, currentSite = "", status = "validating", completedBatches = 0, totalBatches = 0 }: { handleStop: () => void, withContent?: boolean, currentSite?: string, status?: string, completedBatches?: number, totalBatches?: number }): JSX.Element => {
+    console.log('Loading component received status:', status);
+
     let message = "";
     if (status === "validating") {
         message = "Validating";
@@ -193,9 +264,17 @@ const Loading = ({ withContent, currentSite = "", status = "validating", complet
                 </linearGradient>
             </defs>
             <Loader2 stroke="url(#loader-gradient)" strokeWidth="2" />
+
         </svg>
+
     </div>;
 };
+
+const StopButton = ({ handleStop }: { handleStop: () => void }): JSX.Element => {
+    return (
+        <Square onClick={handleStop} className="cursor-pointer hover:text-red-500 transition-colors absolute p7 bottom-10 left-7" />
+    );
+}
 
 const InputContainer = ({ input, setInput, handleSearch }: { input: string, setInput: React.Dispatch<React.SetStateAction<string>>, handleSearch: () => void }): JSX.Element => {
     return (

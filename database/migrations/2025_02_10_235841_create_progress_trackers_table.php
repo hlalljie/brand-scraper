@@ -18,7 +18,8 @@ return new class extends Migration
             $table->json('results')->nullable();
             $table->integer('completed_batches')->default(0);
             $table->integer('total_batches')->default(0);
-            $table->timestamps();  // Gives you created_at and updated_at
+            $table->integer('process_id')->nullable();
+            $table->timestamps();  // created_at and updated_at
         });
     }
 
