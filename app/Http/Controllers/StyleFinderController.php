@@ -225,7 +225,8 @@ class StyleFinderController extends Controller
 
         // Check if worker started
         Log::info("Starting new worker");
-        $workerStart = shell_exec('cd /style-finder && php artisan queue:work > /dev/null 2>&1 &');
+        Log::info("Current directory: " . shell_exec('pwd'));
+        $workerStart = shell_exec('cd /style-finder && php artisan queue:work 2>&1 &');
         Log::info("Worker start output: " . ($workerStart ?? "no output"));
 
         return response()->json([

@@ -223,8 +223,6 @@ const Home = (): JSX.Element => {
 };
 
 const Loading = ({ withContent, currentSite = "", status = "validating", completedBatches = 0, totalBatches = 0 }: { handleStop: () => void, withContent?: boolean, currentSite?: string, status?: string, completedBatches?: number, totalBatches?: number }): JSX.Element => {
-    console.log('Loading component received status:', status);
-
     let message = "";
     if (status === "validating") {
         message = "Validating";

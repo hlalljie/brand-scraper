@@ -45,7 +45,7 @@ After parsing the app will display the results with color previews.
 
 ### Backend
 
-See Laravel Logs: `cat storage/logs/laravel.log`
+See Laravel Logs: `tail -n 200 storage/logs/laravel.log`
 
 Create a php worker: `php artisan queue:work &`
 
@@ -63,3 +63,33 @@ Create DB: `touch database/database.sqlite`
 
 Migrate database: `php artisan migrate`
 
+## Common Issues
+
+### Stuck in Validation Phase
+This usually happens when backend services are stalled. 
+
+#### Check Ollama by using `ps aux | grep ollama`. 
+This should show an `ollama serve` process and if the model is running will show a process like `/usr/local/bin/ollama runner .....`
+
+If serve is not running, use `ollama serve`
+
+If the model is running and it is still stuck on validation then the issue is likely in the service worker.
+
+#### Check Service worker by using `ps aux | grep queue`
+This should show a single service worker process called 
+
+### Ollama error
+#### Check Ollama by using `ps aux | grep ollama`. 
+This should show an `ollama serve` if the server is running
+
+If serve is not running, use `ollama serve`
+
+If the server is running and repeated attempts get the same error, check the logs with
+`tail storage/logs/laravel.log` and look for ollama errors.
+
+If serve is not running, use `ollama serve`
+
+### Other errors
+Follow the above steps for checking for service worker, checking for ollama running, and reading logs for potential issues. 
+
+If you can't find a solution or if you found a solution to a problem you've ran into, please create an issue or a pull request.
