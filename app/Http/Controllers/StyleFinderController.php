@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use App\Models\ProgressTracker;
 use App\Services\WebScraper;
 use App\Services\OllamaParser;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Exception;
+
+defined('SIGTERM') or define('SIGTERM', 15);
 
 class UrlValidationException extends Exception {}
 
@@ -21,8 +24,6 @@ class StyleFinderController extends Controller
     private $timeout = 30;
     private $llmTimeout = 600;
     private $chunkLength = 2000;
-    private $scraper;
-    private $ollamaParser;
 
 
 
@@ -85,6 +86,39 @@ class StyleFinderController extends Controller
         return response()->json($tracker);
     }
 
+    public function stop($processId)
+    {
+
+        // Kill worker process
+        Log::info("Stopping process: " . $processId);
+        posix_kill($processId, SIGTERM);
+        Log::info("Process killed");
+
+        // Clear work queue
+        Log::info("Clearing queue");
+        Artisan::call('queue:clear');
+        $queueCount = DB::table('jobs')->count();
+        Log::info("Jobs remaining in queue: " . $queueCount);
+
+        // Give the worker a moment to start
+        sleep(1);
+
+        // Kill ollama running model
+        Log::info("Killing ollama runner");
+        $ollamaKillOutput = shell_exec('pkill -f "ollama runner"');
+        Log::info("Ollama kill output: " . $ollamaKillOutput);
+
+        // Check if worker started
+        Log::info("Starting new worker");
+        $workerStart = shell_exec('cd /style-finder && php artisan queue:work > /dev/null 2>&1 &');
+        Log::info("Worker start output: " . ($workerStart ?? "no output"));
+
+        return response()->json([
+            'success' => true,
+            'queueCount' => $queueCount
+        ]);
+    }
+
     public function index(Request $request)
     {
         Log::info('Creating db tracker');
@@ -100,6 +134,10 @@ class StyleFinderController extends Controller
 
         // dispatch job to concurrent job queue
         dispatch(function () use ($requestData, $tracker, $timeout, $llmTimeout, $chunkLength) {
+
+            // get process id and update it in the db
+            $pid = getmypid();
+            $tracker->update(['process_id' => $pid]);
 
             $scraper = new WebScraper($timeout);
             $ollamaParser = new OllamaParser($llmTimeout);

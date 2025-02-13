@@ -76,7 +76,7 @@ class OllamaParser
             return $response->getBody()->getContents();
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            throw new LLMParseException('Ollama generate api error');
+            throw new LLMParseException('Ollama generate api error: ' + $e->getMessage());
         }
     }
 
